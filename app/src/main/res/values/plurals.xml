@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="count">
+        <item quantity="zero">Empty</item>
+        <item quantity="one">There is one item</item>
+        <item quantity="two">There is one item</item>
+        <item quantity="few">There is one item</item>
+        <item quantity="many">There is one item</item>
+        <item quantity="other">There are %d items</item>
+    </plurals>
+</resources>

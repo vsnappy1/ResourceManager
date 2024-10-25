@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ResourceProvider</string>
+    <string name="test">Kumar Test</string>
+</resources>
