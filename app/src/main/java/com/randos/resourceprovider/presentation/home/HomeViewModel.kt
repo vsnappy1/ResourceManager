@@ -17,7 +17,7 @@ class HomeViewModel: ViewModel() {
 
     fun getData(){
         viewModelScope.launch {
-            delay(5000)
+            delay(1000)
             _uiState.postValue(HomeScreenState(text = ResourceManager.Strings.test()))
             Log.d("TAG", "getData: ")
         }

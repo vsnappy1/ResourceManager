@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <plurals name="count">
+    <plurals name="count" translatable="false">
         <item quantity="zero">Empty</item>
         <item quantity="one">There is one item</item>
         <item quantity="two">There is one item</item>
