@@ -192,7 +192,6 @@ internal class XmlParser {
                     }
                     resources[PLURAL_TAG] = resources.getOrDefault(PLURAL_TAG, mutableMapOf())
                     resources[PLURAL_TAG]?.put(attributeName, map)
-                    println("generated")
                 }
             }
         }

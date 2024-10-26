@@ -61,16 +61,17 @@ internal class ClassFileGenerator {
             }.toString()
         }
 
+        @Suppress("UNCHECKED_CAST")
         private fun StringBuilder.appendMapResource(resource: Resource<Any>, defaultIndentation: String) {
             if (resource.value is Map<*, *> && resource.value.all { it.key is String && it.value is String }) {
-                @Suppress("UNCHECKED_CAST") // Suppress the warning because we've checked the types
-                append(
-                    generateFunctionForPlural(
-                        resource.name,
-                        resource.value as Map<String, String>,
-                        defaultIndentation
-                    )
-                )
+                appendLine("${defaultIndentation}fun ${resource.name}String(count: Int): String {")
+                resource.variants.forEach {
+                    appendLine("${defaultIndentation}\tif(locale.language == \"${it.identifier}\"){")
+                    appendLine(generateFunctionForPlural(it.value as Map<String, String>, defaultIndentation+"\t"))
+                    appendLine("${defaultIndentation}\t}")
+                }
+                append(generateFunctionForPlural(resource.value as Map<String, String>, defaultIndentation))
+                appendLine("${defaultIndentation}}")
             }
         }
 
@@ -83,11 +84,22 @@ internal class ClassFileGenerator {
             } else {
                 String::class.simpleName
             }
+            appendLine("${defaultIndentation}fun ${resource.name}() : ${resource.returnType}<$dataType> {")
+            resource.variants.forEach {
+                appendLine("${defaultIndentation}\tif(locale.language == \"${it.identifier}\"){")
+                appendLine(
+                    "${defaultIndentation}\t\treturn arrayListOf(${
+                        it.value.toString().replace(Regex("[\\[\\]]"), "")
+                    })"
+                )
+                appendLine("${defaultIndentation}\t}")
+            }
             appendLine(
-                "${defaultIndentation}fun ${resource.name}() : ${resource.returnType}<$dataType> = arrayListOf(${
+                "${defaultIndentation}\treturn arrayListOf(${
                     resource.value.toString().replace(Regex("[\\[\\]]"), "")
                 })"
             )
+            appendLine("${defaultIndentation}}")
         }
 
         private fun StringBuilder.appendFloatResource(resource: Resource<Any>, defaultIndentation: String) {
@@ -106,12 +118,10 @@ internal class ClassFileGenerator {
         }
 
         private fun generateFunctionForPlural(
-            name: String,
             map: Map<String, String>,
             defaultIndentation: String
         ): String {
             return StringBuilder().apply {
-                appendLine("${defaultIndentation}fun ${name}String(count: Int): String {")
                 if (map.containsKey("zero")) {
                     appendLine("${defaultIndentation}\tif (count == 0) {")
                     appendLine("${defaultIndentation}\t\treturn \"${map["zero"]}\"")
@@ -120,13 +130,13 @@ internal class ClassFileGenerator {
 
                 if (map.containsKey("one")) {
                     appendLine("${defaultIndentation}\tif (count == 1) {")
-                    appendLine("\t\t\t\treturn \"${map["one"]}\"")
+                    appendLine("${defaultIndentation}\t\treturn \"${map["one"]}\"")
                     appendLine("${defaultIndentation}\t}")
                 }
 
                 if (map.containsKey("two")) {
                     appendLine("${defaultIndentation}\tif (count == 2) {")
-                    appendLine("\t\t\t\treturn \"${map["two"]}\"")
+                    appendLine("${defaultIndentation}\t\treturn \"${map["two"]}\"")
                     appendLine("${defaultIndentation}\t}")
                 }
 
@@ -147,7 +157,6 @@ internal class ClassFileGenerator {
                 } else {
                     appendLine("${defaultIndentation}\treturn \"\"")
                 }
-                appendLine("${defaultIndentation}}")
             }.toString()
         }
     }
