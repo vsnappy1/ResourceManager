@@ -120,70 +120,70 @@ internal class ClassFileGenerator {
         }
 
         private fun StringBuilder.appendDrawableResource(name: String, defaultIndentation: String) {
-            appendLine("${defaultIndentation}fun ${name.toCamelCase()}() : Drawable = application.resources.getDrawable(R.drawable.${name}, application.theme)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${name.toCamelCase()}() : Drawable = application.resources.getDrawable(R.drawable.${name}, application.theme)")
         }
 
         private fun StringBuilder.appendDimensionResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Float = application.resources.getDimension(R.dimen.${resource.name})")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Float = application.resources.getDimension(R.dimen.${resource.name})")
         }
 
         private fun StringBuilder.appendColorResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Int = application.resources.getColor(R.color.${resource.name}, application.theme)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Int = application.resources.getColor(R.color.${resource.name}, application.theme)")
         }
 
         private fun StringBuilder.appendIntegerResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Int = application.resources.getInteger(R.integer.${resource.name})")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Int = application.resources.getInteger(R.integer.${resource.name})")
         }
 
         private fun StringBuilder.appendBooleanResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Boolean = application.resources.getBoolean(R.bool.${resource.name})")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Boolean = application.resources.getBoolean(R.bool.${resource.name})")
         }
 
         private fun StringBuilder.appendFractionResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Float = application.resources.getFraction(R.fraction.${resource.name}, 0, 0)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Float = application.resources.getFraction(R.fraction.${resource.name}, 0, 0)")
         }
 
         private fun StringBuilder.appendStringResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : String = application.resources.getString(R.string.${resource.name})")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : String = application.resources.getString(R.string.${resource.name})")
         }
 
         private fun StringBuilder.appendPluralResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}(quantity: Int) : String = application.resources.getQuantityString(R.plurals.${resource.name}, quantity)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(quantity: Int) : String = application.resources.getQuantityString(R.plurals.${resource.name}, quantity)")
         }
 
         private fun StringBuilder.appendStringArrayResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : kotlin.Array<String> = application.resources.getStringArray(R.array.${resource.name})")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : kotlin.Array<String> = application.resources.getStringArray(R.array.${resource.name})")
         }
 
         private fun StringBuilder.appendIntArrayResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : IntArray = application.resources.getIntArray(R.array.${resource.name})")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : IntArray = application.resources.getIntArray(R.array.${resource.name})")
         }
     }
 }

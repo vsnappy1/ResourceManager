@@ -9,7 +9,7 @@ import java.io.File
  * @property directoryPath path to the directory of resource.
  * @see [ResourceType]
  */
-data class Resource(
+internal data class Resource(
     val type: ResourceType,
     val directoryPath: File
 )
