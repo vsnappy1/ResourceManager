@@ -1,9 +1,9 @@
-package com.randos.resourceprovider
+package com.randos.resourceprovider.app
 
 import android.app.Application
 import com.randos.resourcemanager.InstallResourceManager
 
-@InstallResourceManager
+@InstallResourceManager(namespace = "com.randos.resourceprovider")
 class ResourceProviderApp: Application() {
 
     override fun onCreate() {

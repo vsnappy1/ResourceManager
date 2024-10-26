@@ -35,14 +35,24 @@ internal class ResourceManagerAnnotationProcessor(
                 )
 
                 file.bufferedWriter().use { out ->
-                    val resourceFiles = getResourceFiles(File(containingFile.filePath))
-                    val classFile = ClassFileGenerator.generateClassFile(packageName, resourceFiles)
+                    val resources = getResources(File(containingFile.filePath))
+                    val classFile = ClassFileGenerator.generateClassFile(
+                        packageName = packageName,
+                        namespace = getNameSpace(it) ?: packageName,
+                        files = resources
+                    )
                     out.write(classFile)
                 }
                 logger.info("Generated file for $className")
             }
         }
         return emptyList()
+    }
+
+    private fun getNameSpace(it: KSClassDeclaration): String? {
+        val namespaceAnnotation =
+            it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == InstallResourceManager::class.qualifiedName }
+        return namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
     }
 
     /**
@@ -52,7 +62,7 @@ internal class ResourceManagerAnnotationProcessor(
      * @param pathToAnnotatedFile A File object representing the path to the annotated file.
      * @return A list of [Resource].
      */
-    private fun getResourceFiles(pathToAnnotatedFile: File): List<Resource> {
+    private fun getResources(pathToAnnotatedFile: File): List<Resource> {
         var pathToMainDirectory = pathToAnnotatedFile
         val list = mutableListOf<Resource>()
 

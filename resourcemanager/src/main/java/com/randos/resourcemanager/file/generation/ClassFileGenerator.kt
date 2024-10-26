@@ -11,12 +11,16 @@ import java.io.File
 internal class ClassFileGenerator {
 
     companion object {
-        fun generateClassFile(packageName: String, files: List<Resource>): String {
+        fun generateClassFile(
+            packageName: String,
+            namespace: String,
+            files: List<Resource>
+        ): String {
             return StringBuilder().apply {
                 appendLine("package $packageName\n")
                 appendLine("import android.app.Application")
                 appendLine("import android.graphics.drawable.Drawable")
-                appendLine("import ${packageName}.R\n")
+                appendLine("import ${namespace}.R\n")
                 appendLine("object ResourceManager {\n")
                 appendLine("\tprivate var _application: Application? = null")
                 appendLine("\tprivate val application: Application")
@@ -69,16 +73,46 @@ internal class ClassFileGenerator {
                 appendLine("\tobject ${name.toCamelCase().replaceFirstChar { it.uppercase() }} {")
                 pairs.forEach { resource ->
                     when (resource.type) {
-                        ValueResourceType.Array -> appendStringArrayResource(resource, defaultIndentation)
-                        ValueResourceType.Boolean -> appendBooleanResource(resource, defaultIndentation)
+                        ValueResourceType.Array, ValueResourceType.StringArray -> appendStringArrayResource(
+                            resource,
+                            defaultIndentation
+                        )
+
+                        ValueResourceType.Boolean -> appendBooleanResource(
+                            resource,
+                            defaultIndentation
+                        )
+
                         ValueResourceType.Color -> appendColorResource(resource, defaultIndentation)
-                        ValueResourceType.Dimension -> appendDimensionResource(resource, defaultIndentation)
-                        ValueResourceType.Fraction -> appendFractionResource(resource, defaultIndentation)
-                        ValueResourceType.IntArray -> appendIntArrayResource(resource, defaultIndentation)
-                        ValueResourceType.Integer -> appendIntegerResource(resource, defaultIndentation)
-                        ValueResourceType.Plural -> appendPluralResource(resource, defaultIndentation)
-                        ValueResourceType.String -> appendStringResource(resource, defaultIndentation)
-                        ValueResourceType.StringArray -> appendStringArrayResource(resource, defaultIndentation)
+                        ValueResourceType.Dimension -> appendDimensionResource(
+                            resource,
+                            defaultIndentation
+                        )
+
+                        ValueResourceType.Fraction -> appendFractionResource(
+                            resource,
+                            defaultIndentation
+                        )
+
+                        ValueResourceType.IntArray -> appendIntArrayResource(
+                            resource,
+                            defaultIndentation
+                        )
+
+                        ValueResourceType.Integer -> appendIntegerResource(
+                            resource,
+                            defaultIndentation
+                        )
+
+                        ValueResourceType.Plural -> appendPluralResource(
+                            resource,
+                            defaultIndentation
+                        )
+
+                        ValueResourceType.String -> appendStringResource(
+                            resource,
+                            defaultIndentation
+                        )
                     }
                 }
                 appendLine("\t}")
@@ -89,39 +123,66 @@ internal class ClassFileGenerator {
             appendLine("${defaultIndentation}fun ${name.toCamelCase()}() : Drawable = application.resources.getDrawable(R.drawable.${name}, application.theme)")
         }
 
-        private fun StringBuilder.appendDimensionResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendDimensionResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Float = application.resources.getDimension(R.dimen.${resource.name})")
         }
 
-        private fun StringBuilder.appendColorResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendColorResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Int = application.resources.getColor(R.color.${resource.name}, application.theme)")
         }
 
-        private fun StringBuilder.appendIntegerResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendIntegerResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Int = application.resources.getInteger(R.integer.${resource.name})")
         }
 
-        private fun StringBuilder.appendBooleanResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendBooleanResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Boolean = application.resources.getBoolean(R.bool.${resource.name})")
         }
 
-        private fun StringBuilder.appendFractionResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendFractionResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Float = application.resources.getFraction(R.fraction.${resource.name}, 0, 0)")
         }
 
-        private fun StringBuilder.appendStringResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendStringResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : String = application.resources.getString(R.string.${resource.name})")
         }
 
-        private fun StringBuilder.appendPluralResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendPluralResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}(quantity: Int) : String = application.resources.getQuantityString(R.plurals.${resource.name}, quantity)")
         }
 
-        private fun StringBuilder.appendStringArrayResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendStringArrayResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : kotlin.Array<String> = application.resources.getStringArray(R.array.${resource.name})")
         }
 
-        private fun StringBuilder.appendIntArrayResource(resource: ValueResource, defaultIndentation: String) {
+        private fun StringBuilder.appendIntArrayResource(
+            resource: ValueResource,
+            defaultIndentation: String
+        ) {
             appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : IntArray = application.resources.getIntArray(R.array.${resource.name})")
         }
     }
