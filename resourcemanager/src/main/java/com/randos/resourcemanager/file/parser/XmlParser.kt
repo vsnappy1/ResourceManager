@@ -1,8 +1,7 @@
 package com.randos.resourcemanager.file.parser
 
-import com.randos.resourcemanager.model.Resource
-import com.randos.resourcemanager.model.ResourceType
-import com.randos.resourcemanager.utils.toCamelCase
+import com.randos.resourcemanager.model.ValueResource
+import com.randos.resourcemanager.model.ValueResourceType
 import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
@@ -26,10 +25,10 @@ internal class XmlParser {
          * Parses an XML file and its variants to create a list of resources.
          *
          * @param file The XML file to parse.
-         * @return A list of Resource objects containing the parsed data.
+         * @return A list of com.randos.resourcemanager.model.Resource objects containing the parsed data.
          */
-        fun parseXML(file: File): List<Resource> {
-            val resources = mutableListOf<Resource>()
+        fun parseXML(file: File): List<ValueResource> {
+            val resources = mutableListOf<ValueResource>()
 
             // Create a DocumentBuilder
             val factory = DocumentBuilderFactory.newInstance()
@@ -57,50 +56,50 @@ internal class XmlParser {
 
         private fun handleElement(
             node: Element,
-            resources: MutableList<Resource>
+            resources: MutableList<ValueResource>
         ) {
             val tagName = node.tagName
             val attributeName = node.getAttribute("name")
 
             when (tagName) {
                 STRING_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.String))
+                    resources.add(ValueResource(attributeName, ValueResourceType.String))
                 }
 
                 COLOR_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Color))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Color))
                 }
 
                 BOOLEAN_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Boolean))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Boolean))
                 }
 
                 INTEGER_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Integer))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Integer))
                 }
 
                 DIMENSION_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Dimension))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Dimension))
                 }
 
                 FRACTION_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Fraction))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Fraction))
                 }
 
                 ARRAY_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Array))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Array))
                 }
 
                 STRING_ARRAY_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.StringArray))
+                    resources.add(ValueResource(attributeName, ValueResourceType.StringArray))
                 }
 
                 INTEGER_ARRAY_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.IntArray))
+                    resources.add(ValueResource(attributeName, ValueResourceType.IntArray))
                 }
 
                 PLURAL_TAG -> {
-                    resources.add(Resource(attributeName, ResourceType.Plural))
+                    resources.add(ValueResource(attributeName, ValueResourceType.Plural))
                 }
             }
         }

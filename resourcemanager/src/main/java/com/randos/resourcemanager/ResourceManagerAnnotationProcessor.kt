@@ -7,6 +7,8 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.randos.resourcemanager.file.generation.ClassFileGenerator
+import com.randos.resourcemanager.model.Resource
+import com.randos.resourcemanager.model.ResourceType
 import java.io.File
 
 internal class ResourceManagerAnnotationProcessor(
@@ -48,10 +50,11 @@ internal class ResourceManagerAnnotationProcessor(
      * within an Android project's res/values directories.
      *
      * @param pathToAnnotatedFile A File object representing the path to the annotated file.
-     * @return A list of files with xml extension.
+     * @return A list of [Resource].
      */
-    private fun getResourceFiles(pathToAnnotatedFile: File): List<File> {
+    private fun getResourceFiles(pathToAnnotatedFile: File): List<Resource> {
         var pathToMainDirectory = pathToAnnotatedFile
+        val list = mutableListOf<Resource>()
 
         return try {
             // Traverse the directory structure upwards until the "main" directory is found.
@@ -62,19 +65,17 @@ internal class ResourceManagerAnnotationProcessor(
             // Locate the "res" directory within the "main" directory.
             val pathToResDirectory = File(pathToMainDirectory, "res")
 
-            // Locate the default "values" directory within the "res" directory.
-            val pathToValuesDirectory = File(pathToResDirectory, "values")
+            // Locate the "values" directory within the "res" directory.
+            list.add(Resource(ResourceType.VALUES, File(pathToResDirectory, "values")))
 
-            // Get all XML files in the default "values" directory.
-            pathToValuesDirectory.listFiles().getXmlFiles()
+            // Locate the "drawable" directory within the "res" directory.
+            list.add(Resource(ResourceType.DRAWABLES, File(pathToResDirectory, "drawable")))
+
+            list
         } catch (e: Exception) {
             // Print the stack trace and return an empty map in case of any exception.
             e.printStackTrace()
             emptyList()
         }
-    }
-
-    private fun Array<File>?.getXmlFiles(): List<File> {
-        return this?.filter { it.extension == "xml" } ?: emptyList()
     }
 }
