@@ -2,25 +2,32 @@ package com.randos.resourcemanager.file.generation
 
 import com.randos.resourcemanager.file.parser.XmlParser
 import com.randos.resourcemanager.model.Resource
-import com.randos.resourcemanager.model.ValueIdentifier
+import com.randos.resourcemanager.model.ResourceType
 import com.randos.resourcemanager.utils.toCamelCase
+import java.io.File
 
 internal class ClassFileGenerator {
 
     companion object {
-        fun generateClassFile(packageName: String, files: Map<String, MutableList<ValueIdentifier>>): String {
+        fun generateClassFile(packageName: String, files: List<File>): String {
             return StringBuilder().apply {
                 appendLine("package $packageName\n")
-                appendLine("import java.util.*\n")
+                appendLine("import android.app.Application")
+                appendLine("import ${packageName}.R\n")
                 appendLine("object ResourceManager {\n")
-                appendLine("\tprivate val locale = Locale.getDefault()\n")
-                files.forEach {
-                    val defaultFile = it.value.removeFirst().file
-                    val resources = XmlParser.parseXML(defaultFile, it.value)
+                appendLine("\tprivate var _application: Application? = null")
+                appendLine("\tprivate val application: Application")
+                appendLine("\t\tget() = _application ?: throw IllegalStateException(\"Application is not initialized, seems like you forgot to invoke ResourceManager.initialize(this) in application class.\")\n")
+                appendLine("\tfun initialize(application: Application) {")
+                appendLine("\t\t_application = application")
+                appendLine("\t}\n")
+
+                files.forEach { file ->
+                    val resources = XmlParser.parseXML(file)
                     // Only create object for file when given file has some resources (i.e. not empty).
                     if (resources.isNotEmpty()) {
                         val resourceObject = generateObject(
-                            defaultFile.nameWithoutExtension,
+                            file.nameWithoutExtension,
                             resources
                         )
                         appendLine(resourceObject)
@@ -30,135 +37,64 @@ internal class ClassFileGenerator {
             }.toString()
         }
 
-        private fun generateObject(name: String, pairs: List<Resource<Any>>): String {
+        private fun generateObject(name: String, pairs: List<Resource>): String {
             val defaultIndentation = "\t\t"
             return StringBuilder().apply {
                 appendLine("\tobject ${name.toCamelCase().replaceFirstChar { it.uppercase() }} {")
                 pairs.forEach { resource ->
-                    when (resource.value::class.simpleName) {
-                        String::class.simpleName -> {
-                            appendStringResource(resource, defaultIndentation)
-                        }
-
-                        Float::class.simpleName -> {
-                            appendFloatResource(resource, defaultIndentation)
-                        }
-
-                        ArrayList::class.simpleName -> {
-                            appendArrayListResource(resource, defaultIndentation)
-                        }
-
-                        HashMap::class.simpleName -> {
-                            appendMapResource(resource, defaultIndentation)
-                        }
-
-                        else -> {
-                            appendLine("${defaultIndentation}fun ${resource.name}() : ${resource.returnType} = ${resource.value}")
-                        }
+                    when (resource.type) {
+                        ResourceType.Array -> appendStringArrayResource(resource, defaultIndentation)
+                        ResourceType.Boolean -> appendBooleanResource(resource, defaultIndentation)
+                        ResourceType.Color -> appendColorResource(resource, defaultIndentation)
+                        ResourceType.Dimension -> appendDimensionResource(resource, defaultIndentation)
+                        ResourceType.Fraction -> appendFractionResource(resource, defaultIndentation)
+                        ResourceType.IntArray -> appendIntArrayResource(resource, defaultIndentation)
+                        ResourceType.Integer -> appendIntegerResource(resource, defaultIndentation)
+                        ResourceType.Plural -> appendPluralResource(resource, defaultIndentation)
+                        ResourceType.String -> appendStringResource(resource, defaultIndentation)
+                        ResourceType.StringArray -> appendStringArrayResource(resource, defaultIndentation)
                     }
                 }
                 appendLine("\t}")
             }.toString()
         }
 
-        @Suppress("UNCHECKED_CAST")
-        private fun StringBuilder.appendMapResource(resource: Resource<Any>, defaultIndentation: String) {
-            if (resource.value is Map<*, *> && resource.value.all { it.key is String && it.value is String }) {
-                appendLine("${defaultIndentation}fun ${resource.name}String(count: Int): String {")
-                resource.variants.forEach {
-                    appendLine("${defaultIndentation}\tif(locale.language == \"${it.identifier}\"){")
-                    appendLine(generateFunctionForPlural(it.value as Map<String, String>, defaultIndentation+"\t"))
-                    appendLine("${defaultIndentation}\t}")
-                }
-                append(generateFunctionForPlural(resource.value as Map<String, String>, defaultIndentation))
-                appendLine("${defaultIndentation}}")
-            }
+        private fun StringBuilder.appendDimensionResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Float = application.resources.getDimension(R.dimen.${resource.name})")
         }
 
-        private fun StringBuilder.appendArrayListResource(
-            resource: Resource<Any>,
-            defaultIndentation: String
-        ) {
-            val dataType = if (resource.value is ArrayList<*> && resource.value.all { it is Int }) {
-                Int::class.simpleName
-            } else {
-                String::class.simpleName
-            }
-            appendLine("${defaultIndentation}fun ${resource.name}() : ${resource.returnType}<$dataType> {")
-            resource.variants.forEach {
-                appendLine("${defaultIndentation}\tif(locale.language == \"${it.identifier}\"){")
-                appendLine(
-                    "${defaultIndentation}\t\treturn arrayListOf(${
-                        it.value.toString().replace(Regex("[\\[\\]]"), "")
-                    })"
-                )
-                appendLine("${defaultIndentation}\t}")
-            }
-            appendLine(
-                "${defaultIndentation}\treturn arrayListOf(${
-                    resource.value.toString().replace(Regex("[\\[\\]]"), "")
-                })"
-            )
-            appendLine("${defaultIndentation}}")
+        private fun StringBuilder.appendColorResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Int = application.resources.getColor(R.color.${resource.name}, application.theme)")
         }
 
-        private fun StringBuilder.appendFloatResource(resource: Resource<Any>, defaultIndentation: String) {
-            appendLine("${defaultIndentation}fun ${resource.name}() : ${resource.returnType} = ${resource.value}f")
+        private fun StringBuilder.appendIntegerResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Int = application.resources.getInteger(R.integer.${resource.name})")
         }
 
-        private fun StringBuilder.appendStringResource(resource: Resource<Any>, defaultIndentation: String) {
-            appendLine("${defaultIndentation}fun ${resource.name}() : ${resource.returnType} {")
-            resource.variants.forEach {
-                appendLine("${defaultIndentation}\tif(locale.language == \"${it.identifier}\"){")
-                appendLine("${defaultIndentation}\t\treturn \"${it.value}\"")
-                appendLine("${defaultIndentation}\t}")
-            }
-            appendLine("${defaultIndentation}\treturn \"${resource.value}\"")
-            appendLine("${defaultIndentation}}")
+        private fun StringBuilder.appendBooleanResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Boolean = application.resources.getBoolean(R.bool.${resource.name})")
         }
 
-        private fun generateFunctionForPlural(
-            map: Map<String, String>,
-            defaultIndentation: String
-        ): String {
-            return StringBuilder().apply {
-                if (map.containsKey("zero")) {
-                    appendLine("${defaultIndentation}\tif (count == 0) {")
-                    appendLine("${defaultIndentation}\t\treturn \"${map["zero"]}\"")
-                    appendLine("${defaultIndentation}\t}")
-                }
+        private fun StringBuilder.appendFractionResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : Float = application.resources.getFraction(R.fraction.${resource.name}, 0, 0)")
+        }
 
-                if (map.containsKey("one")) {
-                    appendLine("${defaultIndentation}\tif (count == 1) {")
-                    appendLine("${defaultIndentation}\t\treturn \"${map["one"]}\"")
-                    appendLine("${defaultIndentation}\t}")
-                }
+        private fun StringBuilder.appendStringResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : String = application.resources.getString(R.string.${resource.name})")
+        }
 
-                if (map.containsKey("two")) {
-                    appendLine("${defaultIndentation}\tif (count == 2) {")
-                    appendLine("${defaultIndentation}\t\treturn \"${map["two"]}\"")
-                    appendLine("${defaultIndentation}\t}")
-                }
+        private fun StringBuilder.appendPluralResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}(quantity: Int) : String = application.resources.getQuantityString(R.plurals.${resource.name}, quantity)")
+        }
 
-                if (map.containsKey("few")) {
-                    appendLine("${defaultIndentation}\tif (count in 3..5) {")
-                    appendLine("${defaultIndentation}\t\treturn \"${map["few"]}\"")
-                    appendLine("${defaultIndentation}\t}")
-                }
+        private fun StringBuilder.appendStringArrayResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : kotlin.Array<String> = application.resources.getStringArray(R.array.${resource.name})")
+        }
 
-                if (map.containsKey("many")) {
-                    appendLine("${defaultIndentation}\tif (count in 6..9) {")
-                    appendLine("${defaultIndentation}\t\treturn \"${map["many"]}\"")
-                    appendLine("${defaultIndentation}\t}")
-                }
-
-                if (map.containsKey("other")) {
-                    appendLine("${defaultIndentation}\treturn \"${map["other"]}\"")
-                } else {
-                    appendLine("${defaultIndentation}\treturn \"\"")
-                }
-            }.toString()
+        private fun StringBuilder.appendIntArrayResource(resource: Resource, defaultIndentation: String) {
+            appendLine("${defaultIndentation}fun ${resource.name.toCamelCase()}() : IntArray = application.resources.getIntArray(R.array.${resource.name})")
         }
     }
 }
+
 

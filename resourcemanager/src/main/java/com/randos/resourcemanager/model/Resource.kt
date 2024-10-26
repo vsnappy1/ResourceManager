@@ -1,8 +1,6 @@
 package com.randos.resourcemanager.model
 
-internal data class Resource<T>(
+internal data class Resource(
     val name: String,
-    val value: T,
-    val returnType: String = value!!::class.simpleName.toString(),
-    val variants: List<ValueVariant<T>> = emptyList()
+    val type: ResourceType,
 )
