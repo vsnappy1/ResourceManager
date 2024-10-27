@@ -5,4 +5,4 @@ install:
   - ./gradlew clean :resourcemanager:build
 
 publish:
-  - ./gradlew :resourcemanager:publishToMavenLocal
+  - ./gradlew :resourcemanager:publish
