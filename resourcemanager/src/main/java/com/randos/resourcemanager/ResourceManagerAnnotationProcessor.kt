@@ -52,7 +52,9 @@ internal class ResourceManagerAnnotationProcessor(
     private fun getNameSpace(it: KSClassDeclaration): String? {
         val namespaceAnnotation =
             it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == InstallResourceManager::class.qualifiedName }
-        return namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
+        val namespace = namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
+        if (namespace?.isEmpty() == true) return null
+        return namespace
     }
 
     /**
