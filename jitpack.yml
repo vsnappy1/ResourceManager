@@ -1,0 +1,8 @@
+jdk:
+  - openjdk17
+
+install:
+  - ./gradlew clean :resourcemanager:build
+
+publish:
+  - ./gradlew :resourcemanager:publishToMavenLocal
