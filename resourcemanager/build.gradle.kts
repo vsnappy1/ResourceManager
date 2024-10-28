@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.security.MessageDigest
+import java.util.Properties
+import java.util.Base64
 
 plugins {
     id("java-library")
@@ -176,6 +178,70 @@ tasks.register("generateCheckSum") {
     }
     // Ensure the task depends on the artifacts being generated and moved to upload directory
     dependsOn("moveGeneratedArtifacts")
+}
+
+val signingFileName = "secring.gpg"
+val signingFilePath = layout.buildDirectory.dir("secret")
+
+// Register the signing tasks
+tasks.register("signArtifacts") {
+    group = "signing" // Grouping under signing category
+    description = "Signs all artifacts with GPG/PGP."
+
+    // Get the publication for which we need to sign the files
+    val publication = (publishing.publications.getByName("java") as MavenPublication)
+
+    // Define the files to sign
+    val baseJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}.jar"))
+    val javadocJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}-javadoc.jar"))
+    val sourcesJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}-sources.jar"))
+    val pomFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}.pom"))
+
+    doLast {
+        val filesToSign = listOf(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
+
+        // Signing each file
+        filesToSign.forEach { file ->
+            if (file.exists()) {
+                val signatureFile = file("${file.absolutePath}.asc")
+                val keyringPath = "$signingFilePath/$signingFileName"
+                println(keyringPath)
+
+                exec {
+                    commandLine("gpg", "--batch", "--yes", "--keyring", keyringPath, "--output", signatureFile.absolutePath, "--sign", file.absolutePath)
+                }
+                println("Signed: ${file.name} -> ${signatureFile.name}")
+            } else {
+                println("File does not exist, skipping: ${file.name}")
+            }
+        }
+    }
+    // Ensure the task depends on the artifacts being generated and moved to upload directory
+    dependsOn("moveGeneratedArtifacts", "generateSigningFile")
+}
+
+tasks.register("generateSigningFile") {
+    group = "build setup"
+    description = "Generates the GPG signing file from a Base64 encoded string"
+
+    doLast {
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        val keyringBase64 =
+            properties.getProperty("keyringBase64") ?: System.getenv("keyringBase64")
+
+        if (keyringBase64 == null) {
+            throw GradleException("No keyringBase64 found in local.properties or environment variables")
+        }
+
+        val directory = file(signingFilePath)
+        directory.mkdirs()
+        val outputFile = file(("${directory.absolutePath}/$signingFileName"))
+        val decodedBytes = Base64.getDecoder().decode(keyringBase64)
+        outputFile.writeBytes(decodedBytes)
+
+        println("Signing file created successfully.")
+    }
 }
 
 afterEvaluate {
