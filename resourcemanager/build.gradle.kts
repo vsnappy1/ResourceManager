@@ -40,7 +40,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("java"){
                 from(components["java"])
-                groupId = "com.github.vsnappy1"
+                groupId = "dev.randos"
                 artifactId = "resourcemanager"
                 version = "1.0.0"
             }

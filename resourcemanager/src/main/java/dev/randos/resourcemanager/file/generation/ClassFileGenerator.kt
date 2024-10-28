@@ -1,11 +1,11 @@
-package com.randos.resourcemanager.file.generation
+package dev.randos.resourcemanager.file.generation
 
-import com.randos.resourcemanager.file.parser.XmlParser
-import com.randos.resourcemanager.model.Resource
-import com.randos.resourcemanager.model.ResourceType
-import com.randos.resourcemanager.model.ValueResource
-import com.randos.resourcemanager.model.ValueResourceType
-import com.randos.resourcemanager.utils.toCamelCase
+import dev.randos.resourcemanager.file.parser.XmlParser
+import dev.randos.resourcemanager.model.Resource
+import dev.randos.resourcemanager.model.ResourceType
+import dev.randos.resourcemanager.model.ValueResource
+import dev.randos.resourcemanager.model.ValueResourceType
+import dev.randos.resourcemanager.utils.toCamelCase
 import java.io.File
 
 internal class ClassFileGenerator {

@@ -1,4 +1,4 @@
-package com.randos.resourcemanager
+package dev.randos.resourcemanager
 
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment

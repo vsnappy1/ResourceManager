@@ -1,4 +1,4 @@
-package com.randos.resourcemanager
+package dev.randos.resourcemanager
 
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -6,9 +6,9 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.randos.resourcemanager.file.generation.ClassFileGenerator
-import com.randos.resourcemanager.model.Resource
-import com.randos.resourcemanager.model.ResourceType
+import dev.randos.resourcemanager.file.generation.ClassFileGenerator
+import dev.randos.resourcemanager.model.Resource
+import dev.randos.resourcemanager.model.ResourceType
 import java.io.File
 
 internal class ResourceManagerAnnotationProcessor(

@@ -1,7 +1,7 @@
-package com.randos.resourcemanager.file.parser
+package dev.randos.resourcemanager.file.parser
 
-import com.randos.resourcemanager.model.ValueResource
-import com.randos.resourcemanager.model.ValueResourceType
+import dev.randos.resourcemanager.model.ValueResource
+import dev.randos.resourcemanager.model.ValueResourceType
 import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
