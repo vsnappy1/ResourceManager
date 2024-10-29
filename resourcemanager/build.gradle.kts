@@ -1,7 +1,5 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.security.MessageDigest
-import java.util.Properties
-import java.util.Base64
 
 plugins {
     id("java-library")
@@ -42,75 +40,132 @@ kotlin {
     jvmToolchain(11)
 }
 
+val mavenPublication: MavenPublication by lazy {
+    (publishing.publications.getByName("java") as MavenPublication)
+}
+
+val artifactRepo: File by lazy {
+    val path = mavenPublication.let {
+        StringBuilder().apply {
+            append("upload/")
+            append("${it.groupId.replace(".", "/")}/")
+            append("${it.artifactId}/")
+            append(it.version)
+        }.toString()
+    }
+    file(layout.buildDirectory.dir(path))
+}
+
+val fullArtifactName: String by lazy {
+    "${mavenPublication.artifactId}-${mavenPublication.version}"
+}
+
+/* ----------------- Generate Artifacts ----------------- */
+
 // Task to generate Javadoc JAR
 tasks.register<Jar>("generateJavadocJar") {
     group = "build"
     description = "Generates a JAR file containing Javadoc."
-    dependsOn(tasks.named("javadoc"))
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-    archiveBaseName.set(publication.artifactId)
-    archiveVersion.set(publication.version)
+
+    archiveBaseName.set(mavenPublication.artifactId)
+    archiveVersion.set(mavenPublication.version)
     archiveClassifier.set("javadoc")
     from(provider { tasks.named<Javadoc>("javadoc").get().destinationDir })
+    dependsOn(tasks.named("javadoc"))
 }
 
 // Task to generate sources JAR
 tasks.register<Jar>("generateSourcesJar") {
     group = "build"
     description = "Generates a JAR file containing source files."
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-    archiveBaseName.set(publication.artifactId)
-    archiveVersion.set(publication.version)
+    archiveBaseName.set(mavenPublication.artifactId)
+    archiveVersion.set(mavenPublication.version)
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
 }
 
 // Task to generate the POM file
-tasks.register<GenerateMavenPom>("generatePomXml") {
+tasks.register<GenerateMavenPom>("generatePom") {
     group = "build"
     description = "Generates the POM XML file for the Maven publication."
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-    destination =
-        file(layout.buildDirectory.dir("generated/maven/${publication.artifactId}-${publication.version}.pom"))
-    pom = publication.pom
+    destination = file(layout.buildDirectory.dir("generated/maven/${fullArtifactName}.pom"))
+    pom = mavenPublication.pom
 }
 
 // Combined task to execute all tasks
 tasks.register("generateArtifacts") {
     group = "build"
     description = "Generates base JAR, javadoc JAR, sources JAR, and POM file."
-    dependsOn("build", "generateJavadocJar", "generateSourcesJar", "generatePomXml")
+    dependsOn("build", "generateJavadocJar", "generateSourcesJar", "generatePom")
     doLast {
-        println("All artifacts (Javadoc JAR, sources JAR, and POM) have been generated successfully.")
+        println("Generated file: ${fullArtifactName}.jar")
+        println("Generated file: ${fullArtifactName}-javadoc.jar")
+        println("Generated file: ${fullArtifactName}-sources.jar")
+        println("Generated file: ${fullArtifactName}.pom")
     }
+    finalizedBy("moveGeneratedArtifacts")
 }
 
+// Renames the original jar file
 tasks.named("build") {
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-    archivesName = "${publication.artifactId}-${publication.version}"
+    archivesName = fullArtifactName
 }
 
 // Task to move generated artifacts to the upload directory
 tasks.register<Copy>("moveGeneratedArtifacts") {
     group = "move" // Grouping under upload category
-    description = "Moves generated base JAR, javadoc JAR, sources JAR, and POM file to the upload directory." // Description of the task
+    description =
+        "Moves generated base JAR, javadoc JAR, sources JAR, and POM file to the upload directory." // Description of the task
 
     // Define the source files
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-    val baseJarFile = file(layout.buildDirectory.dir("libs/${publication.artifactId}-${publication.version}.jar"))
-    val javadocJarFile = file(layout.buildDirectory.dir("libs/${publication.artifactId}-${publication.version}-javadoc.jar"))
-    val sourcesJarFile = file(layout.buildDirectory.dir("libs/${publication.artifactId}-${publication.version}-sources.jar"))
-    val pomFile = file(layout.buildDirectory.dir("generated/maven/${publication.artifactId}-${publication.version}.pom"))
-
-    // Define the destination directory
-    val uploadDir = file(layout.buildDirectory.dir("upload"))
+    val baseJarFile = file(layout.buildDirectory.dir("libs/${fullArtifactName}.jar"))
+    val javadocJarFile = file(layout.buildDirectory.dir("libs/${fullArtifactName}-javadoc.jar"))
+    val sourcesJarFile = file(layout.buildDirectory.dir("libs/${fullArtifactName}-sources.jar"))
+    val pomFile = file(layout.buildDirectory.dir("generated/maven/${fullArtifactName}.pom"))
 
     // Specify the files to move
     from(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
-    into(uploadDir)
+    into(artifactRepo)
 
     // Ensure the task depends on the artifacts being generated
     dependsOn("generateArtifacts")
+}
+
+/* ----------------- Generate CheckSum ----------------- */
+
+// Task to generate checksums
+tasks.register("generateCheckSum") {
+    group = "verification" // Grouping under verification category
+    description = "Generates MD5 and SHA-1 checksums for specified files."
+
+    doLast {
+        // List of files to generate checksums for
+        val baseJarFile = file("${artifactRepo}/${fullArtifactName}.jar")
+        val javadocJarFile = file("${artifactRepo}/${fullArtifactName}-javadoc.jar")
+        val sourcesJarFile = file("${artifactRepo}/${fullArtifactName}-sources.jar")
+        val pomFile = file("${artifactRepo}/${fullArtifactName}.pom")
+
+        val filesToChecksum = listOf(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
+
+        filesToChecksum.forEach { file ->
+            if (file.exists()) {
+                val md5File = file("${file.absolutePath}.md5")
+                val sha1File = file("${file.absolutePath}.sha1")
+
+                // Generate and write MD5 checksum
+                md5File.writeText(file.md5())
+                // Generate and write SHA-1 checksum
+                sha1File.writeText(file.sha1())
+
+                println("Generated checksums for: ${file.name}")
+            } else {
+                println("File does not exist: ${file.name}")
+            }
+        }
+    }
+    mustRunAfter("moveGeneratedArtifacts")
+    // Ensure the task depends on the artifacts being generated and moved to upload directory
+    dependsOn("moveGeneratedArtifacts")
 }
 
 // Extension function to generate MD5 checksum
@@ -141,61 +196,18 @@ fun File.sha1(): String {
     }
 }
 
-// Task to generate checksums
-tasks.register("generateCheckSum") {
-    group = "verification" // Grouping under verification category
-    description = "Generates MD5 and SHA-1 checksums for specified files."
-
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-
-    // Define the files for which checksums will be generated
-    val baseJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}.jar"))
-    val javadocJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}-javadoc.jar"))
-    val sourcesJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}-sources.jar"))
-    val pomFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}.pom"))
-
-    doLast {
-        // List of files to generate checksums for
-        val filesToChecksum = listOf(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
-
-        filesToChecksum.forEach { file ->
-            if (file.exists()) {
-                val md5File = file("${file.absolutePath}.md5")
-                val sha1File = file("${file.absolutePath}.sha1")
-
-                // Generate and write MD5 checksum
-                md5File.writeText(file.md5())
-                // Generate and write SHA-1 checksum
-                sha1File.writeText(file.sha1())
-
-                println("Generated checksums for: ${file.name}")
-                println(" - MD5: ${md5File.readText()}")
-                println(" - SHA-1: ${sha1File.readText()}")
-            } else {
-                println("File does not exist: ${file.name}")
-            }
-        }
-    }
-    // Ensure the task depends on the artifacts being generated and moved to upload directory
-    dependsOn("moveGeneratedArtifacts")
-}
-
-val signingFileName = "secring.gpg"
-val signingFilePath = layout.buildDirectory.dir("secret")
+/* ----------------- Sign Artifacts ----------------- */
 
 // Register the signing tasks
 tasks.register("signArtifacts") {
     group = "signing" // Grouping under signing category
     description = "Signs all artifacts with GPG/PGP."
 
-    // Get the publication for which we need to sign the files
-    val publication = (publishing.publications.getByName("java") as MavenPublication)
-
     // Define the files to sign
-    val baseJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}.jar"))
-    val javadocJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}-javadoc.jar"))
-    val sourcesJarFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}-sources.jar"))
-    val pomFile = file(layout.buildDirectory.dir("upload/${publication.artifactId}-${publication.version}.pom"))
+    val baseJarFile = file("${artifactRepo}/${fullArtifactName}.jar")
+    val javadocJarFile = file("${artifactRepo}/${fullArtifactName}-javadoc.jar")
+    val sourcesJarFile = file("${artifactRepo}/${fullArtifactName}-sources.jar")
+    val pomFile = file("${artifactRepo}/${fullArtifactName}.pom")
 
     doLast {
         val filesToSign = listOf(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
@@ -203,46 +215,33 @@ tasks.register("signArtifacts") {
         // Signing each file
         filesToSign.forEach { file ->
             if (file.exists()) {
-                val signatureFile = file("${file.absolutePath}.asc")
-                val keyringPath = "$signingFilePath/$signingFileName"
-                println(keyringPath)
-
                 exec {
-                    commandLine("gpg", "--batch", "--yes", "--keyring", keyringPath, "--output", signatureFile.absolutePath, "--sign", file.absolutePath)
+                    commandLine("gpg", "-ab", file.absolutePath)
                 }
-                println("Signed: ${file.name} -> ${signatureFile.name}")
+                println("Generated signed file for: ${file.name}")
             } else {
                 println("File does not exist, skipping: ${file.name}")
             }
         }
     }
+    mustRunAfter("moveGeneratedArtifacts")
     // Ensure the task depends on the artifacts being generated and moved to upload directory
-    dependsOn("moveGeneratedArtifacts", "generateSigningFile")
+    dependsOn("moveGeneratedArtifacts")
 }
 
-tasks.register("generateSigningFile") {
-    group = "build setup"
-    description = "Generates the GPG signing file from a Base64 encoded string"
-
+tasks.register<Zip>("createBundle") {
+    group = "build" // or any other logical grouping you prefer
+    description = "Creates a ZIP bundle of the generated artifacts for distribution."
+    archiveFileName = "bundle.zip"
+    destinationDirectory = file(layout.buildDirectory.dir("zip"))
+    from(file(layout.buildDirectory.dir("upload")))
     doLast {
-        val properties = Properties()
-        properties.load(project.rootProject.file("local.properties").inputStream())
-        val keyringBase64 =
-            properties.getProperty("keyringBase64") ?: System.getenv("keyringBase64")
-
-        if (keyringBase64 == null) {
-            throw GradleException("No keyringBase64 found in local.properties or environment variables")
-        }
-
-        val directory = file(signingFilePath)
-        directory.mkdirs()
-        val outputFile = file(("${directory.absolutePath}/$signingFileName"))
-        val decodedBytes = Base64.getDecoder().decode(keyringBase64)
-        outputFile.writeBytes(decodedBytes)
-
-        println("Signing file created successfully.")
+        println("Bundle generated.")
     }
+    dependsOn("moveGeneratedArtifacts", "generateCheckSum", "signArtifacts")
 }
+
+/* ----------------- Maven Publish (Meta data) ----------------- */
 
 afterEvaluate {
     publishing {
@@ -252,6 +251,9 @@ afterEvaluate {
                 groupId = "dev.randos"
                 artifactId = "resourcemanager"
                 version = "1.0.0"
+
+                val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
+                artifact(bundle)
 
                 pom {
                     name = "${groupId}:${artifactId}"
@@ -271,7 +273,7 @@ afterEvaluate {
                             name = "Vishal Kumar"
                             email = "vsnappy1@gmail.com"
                             organization = "Randos"
-                            organizationUrl = "http://www.randos.dev"
+                            organizationUrl = "https://www.randos.dev"
                         }
                     }
 
