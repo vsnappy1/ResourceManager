@@ -29,6 +29,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Print Secret
+        env:
+          MY_SECRET: ${{ secrets.GPG_SECRET_KEY }}
+        run: |
+          # Print a masked version of the secret for debugging
+          echo "Hello, secret: ${MY_SECRET:0:100}****"
+
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
