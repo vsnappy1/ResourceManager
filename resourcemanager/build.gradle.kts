@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 import java.security.MessageDigest
+import java.util.Properties
 
 plugins {
     id("java-library")
@@ -128,7 +129,7 @@ tasks.register<Copy>("moveGeneratedArtifacts") {
     into(artifactRepo)
 
     // Ensure the task depends on the artifacts being generated
-    dependsOn("generateArtifacts")
+    mustRunAfter("generateArtifacts")
 }
 
 /* ----------------- Generate CheckSum ----------------- */
@@ -164,8 +165,6 @@ tasks.register("generateCheckSum") {
         }
     }
     mustRunAfter("moveGeneratedArtifacts")
-    // Ensure the task depends on the artifacts being generated and moved to upload directory
-    dependsOn("moveGeneratedArtifacts")
 }
 
 // Extension function to generate MD5 checksum
@@ -212,11 +211,16 @@ tasks.register("signArtifacts") {
     doLast {
         val filesToSign = listOf(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
 
+        val properties = Properties().apply {
+            load(project.rootProject.file("local.properties").inputStream())
+        }
+        val passphrase = properties.getProperty("GPG_PASSPHRASE") ?: System.getenv("GPG_PASSPHRASE")
+
         // Signing each file
         filesToSign.forEach { file ->
             if (file.exists()) {
                 exec {
-                    commandLine("gpg", "-ab", file.absolutePath)
+                    commandLine("gpg", "--batch", "--yes", "--passphrase", passphrase, "-ab", file.absolutePath)
                 }
                 println("Generated signed file for: ${file.name}")
             } else {
@@ -225,8 +229,6 @@ tasks.register("signArtifacts") {
         }
     }
     mustRunAfter("moveGeneratedArtifacts")
-    // Ensure the task depends on the artifacts being generated and moved to upload directory
-    dependsOn("moveGeneratedArtifacts")
 }
 
 tasks.register<Zip>("createBundle") {
@@ -238,7 +240,7 @@ tasks.register<Zip>("createBundle") {
     doLast {
         println("Bundle generated.")
     }
-    dependsOn("moveGeneratedArtifacts", "generateCheckSum", "signArtifacts")
+    mustRunAfter("moveGeneratedArtifacts", "generateCheckSum", "signArtifacts")
 }
 
 /* ----------------- Maven Publish (Meta data) ----------------- */
