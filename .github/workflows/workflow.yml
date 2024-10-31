@@ -29,13 +29,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Print Secret
-        env:
-          MY_SECRET: ${{ secrets.GPG_SECRET_KEY }}
-        run: |
-          # Print a masked version of the secret for debugging
-          echo "Hello, secret: ${MY_SECRET:0:100}****"
-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -43,23 +36,16 @@ jobs:
           java-version: 17
 
       - id: install-secret-key
-        name: Install and Verify GPG Secret Key
+        name: Install gpg secret key
         run: |
-          # Save the secret key to a file
-          echo "${{ secrets.GPG_SECRET_KEY }}" > secret_key.asc
-          
-          # Print the first and last few lines to check if content is correct
-          echo "First few lines of the GPG key:"
-          head -n 5 secret_key.asc
-          
-          echo "Last few lines of the GPG key:"
-          tail -n 5 secret_key.asc
-          
-          # Attempt to import the GPG key
-          gpg --batch --import secret_key.asc
+          # Install gpg secret key
+          cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2.0.10
+
+      - name: Build
+        uses: ./gradlew build
 
       - name: Generate Artifacts
         uses: ./gradlew generateArtifacts
