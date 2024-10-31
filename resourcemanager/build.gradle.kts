@@ -211,10 +211,17 @@ tasks.register("signArtifacts") {
     doLast {
         val filesToSign = listOf(baseJarFile, javadocJarFile, sourcesJarFile, pomFile)
 
-        val properties = Properties().apply {
-            load(project.rootProject.file("local.properties").inputStream())
+        // Load passphrase from local.properties or environment variable
+        val properties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+
+        // Check if local.properties exists
+        if (localPropertiesFile.exists()) {
+            properties.load(localPropertiesFile.inputStream())
         }
+
         val passphrase = properties.getProperty("GPG_PASSPHRASE") ?: System.getenv("GPG_PASSPHRASE")
+        ?: throw GradleException("GPG_PASSPHRASE not found in local.properties or environment variables.")
 
         // Signing each file
         filesToSign.forEach { file ->
