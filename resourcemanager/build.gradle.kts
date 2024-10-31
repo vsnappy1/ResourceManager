@@ -227,7 +227,7 @@ tasks.register("signArtifacts") {
         filesToSign.forEach { file ->
             if (file.exists()) {
                 exec {
-                    commandLine("gpg", "--batch", "--yes", "--passphrase", passphrase, "-ab", file.absolutePath)
+                    commandLine("gpg", "--batch", "--yes", "--passphrase", passphrase, "--pinentry-mode", "loopback", "-ab", file.absolutePath)
                 }
                 println("Generated signed file for: ${file.name}")
             } else {
