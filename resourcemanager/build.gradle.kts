@@ -97,7 +97,7 @@ tasks.register<GenerateMavenPom>("generatePom") {
 tasks.register("generateArtifacts") {
     group = "build"
     description = "Generates base JAR, javadoc JAR, sources JAR, and POM file."
-    dependsOn("build", "generateJavadocJar", "generateSourcesJar", "generatePom")
+    dependsOn(":resourcemanager:build", "generateJavadocJar", "generateSourcesJar", "generatePom")
     doLast {
         println("Generated file: ${fullArtifactName}.jar")
         println("Generated file: ${fullArtifactName}-javadoc.jar")
@@ -252,47 +252,72 @@ tasks.register<Zip>("createBundle") {
 
 /* ----------------- Maven Publish (Meta data) ----------------- */
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("java") {
-                from(components["java"])
-                groupId = "dev.randos"
-                artifactId = "resourcemanager"
-                version = "1.0.0"
+publishing {
+    publications {
+        create<MavenPublication>("java") {
+            from(components["java"])
+            groupId = "dev.randos"
+            artifactId = "resourcemanager"
+            version = "1.0.0"
 
-                val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
-                artifact(bundle)
+            val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
+            artifact(bundle)
 
-                pom {
-                    name = "${groupId}:${artifactId}"
-                    description =
-                        "An Android library that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g. ViewModel) using generated code."
-                    url = "https://github.com/vsnappy1/ResourceManager"
+            pom {
+                name = "${groupId}:${artifactId}"
+                description =
+                    "An Android library that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g. ViewModel) using generated code."
+                url = "https://github.com/vsnappy1/ResourceManager"
 
-                    licenses {
-                        license {
-                            name = "The Apache License, Version 2.0"
-                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            name = "Vishal Kumar"
-                            email = "vsnappy1@gmail.com"
-                            organization = "Randos"
-                            organizationUrl = "https://www.randos.dev"
-                        }
-                    }
-
-                    scm {
-                        connection = "scm:git:git://github.com/vsnappy1/ResourceManager.git"
-                        developerConnection =
-                            "scm:git:ssh://github.com/vsnappy1/ResourceManager.git"
-                        url = "https://github.com/vsnappy1/ResourceManager"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
                     }
                 }
+
+                developers {
+                    developer {
+                        name = "Vishal Kumar"
+                        email = "vsnappy1@gmail.com"
+                        organization = "Randos"
+                        organizationUrl = "https://www.randos.dev"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:git://github.com/vsnappy1/ResourceManager.git"
+                    developerConnection =
+                        "scm:git:ssh://github.com/vsnappy1/ResourceManager.git"
+                    url = "https://github.com/vsnappy1/ResourceManager"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+
+            // Load passphrase from local.properties or environment variable
+            val properties = Properties()
+            val localPropertiesFile = project.rootProject.file("local.properties")
+
+            // Check if local.properties exists
+            if (localPropertiesFile.exists()) {
+                properties.load(localPropertiesFile.inputStream())
+            }
+
+            val username = properties.getProperty("SONATYPE_USERNAME_TOKEN") ?: System.getenv("SONATYPE_USERNAME_TOKEN")
+            ?: throw GradleException("GPG_PASSPHRASE not found in local.properties or environment variables.")
+            val password = properties.getProperty("SONATYPE_PASSWORD_TOKEN") ?: System.getenv("SONATYPE_PASSWORD_TOKEN")
+            ?: throw GradleException("GPG_PASSPHRASE not found in local.properties or environment variables.")
+
+            credentials {
+                this.username = username
+                this.password = password
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
             }
         }
     }
