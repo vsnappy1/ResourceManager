@@ -57,6 +57,8 @@ jobs:
 
       - name: Sign Artifacts
         run: ./gradlew signArtifacts
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Create bundle
         run: ./gradlew createBundle
