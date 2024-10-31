@@ -40,14 +40,9 @@ jobs:
         run: |
           # Install gpg secret key
           cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
-          # Verify gpg secret key
-          gpg --list-secret-keys --keyid-format LONG
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2.0.10
-
-      - name: Build
-        run: ./gradlew build
 
       - name: Generate Artifacts
         run: ./gradlew generateArtifacts
@@ -62,15 +57,9 @@ jobs:
 
       - name: Create bundle
         run: ./gradlew createBundle
-        
-      - id: publish-to-central
-        name: Publish to Central Repository
-        env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME_TOKEN }}
-          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD_TOKEN }}
-        run: |
-          mvn \
-            --no-transfer-progress \
-            --batch-mode \
-            -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
-            clean deploy
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: bundle
+          path: resourcemanager/build/zip/bundle.zip
