@@ -40,6 +40,8 @@ jobs:
         run: |
           # Install gpg secret key
           cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
+          # Verify gpg secret key
+          gpg --list-secret-keys --keyid-format LONG
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2.0.10
