@@ -45,19 +45,19 @@ jobs:
         uses: android-actions/setup-android@v2.0.10
 
       - name: Build
-        uses: ./gradlew build
+        run: ./gradlew build
 
       - name: Generate Artifacts
-        uses: ./gradlew generateArtifacts
+        run: ./gradlew generateArtifacts
 
       - name: Generate CheckSum
-        uses: ./gradlew generateCheckSum
+        run: ./gradlew generateCheckSum
 
       - name: Sign Artifacts
-        uses: ./gradlew signArtifacts
+        run: ./gradlew signArtifacts
 
       - name: Create bundle
-        uses: ./gradlew createBundle
+        run: ./gradlew createBundle
         
       - id: publish-to-central
         name: Publish to Central Repository
