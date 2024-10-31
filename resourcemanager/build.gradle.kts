@@ -294,31 +294,4 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-
-            // Load passphrase from local.properties or environment variable
-            val properties = Properties()
-            val localPropertiesFile = project.rootProject.file("local.properties")
-
-            // Check if local.properties exists
-            if (localPropertiesFile.exists()) {
-                properties.load(localPropertiesFile.inputStream())
-            }
-
-            val username = properties.getProperty("SONATYPE_USERNAME_TOKEN") ?: System.getenv("SONATYPE_USERNAME_TOKEN")
-            ?: throw GradleException("GPG_PASSPHRASE not found in local.properties or environment variables.")
-            val password = properties.getProperty("SONATYPE_PASSWORD_TOKEN") ?: System.getenv("SONATYPE_PASSWORD_TOKEN")
-            ?: throw GradleException("GPG_PASSPHRASE not found in local.properties or environment variables.")
-
-            credentials {
-                this.username = username
-                this.password = password
-            }
-            authentication {
-                create<BasicAuthentication>("basic")
-            }
-        }
-    }
 }
