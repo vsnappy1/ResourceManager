@@ -253,45 +253,46 @@ tasks.register<Zip>("createBundle") {
 }
 
 /* ----------------- Maven Publish (Meta data) ----------------- */
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("java") {
+                from(components["java"])
+                groupId = "dev.randos"
+                artifactId = "resourcemanager"
+                version = "1.0.0"
 
-publishing {
-    publications {
-        create<MavenPublication>("java") {
-            from(components["java"])
-            groupId = "dev.randos"
-            artifactId = "resourcemanager"
-            version = "1.0.0"
+                val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
+                artifact(bundle)
 
-            val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
-            artifact(bundle)
-
-            pom {
-                name = "${groupId}:${artifactId}"
-                description =
-                    "An Android library that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g. ViewModel) using generated code."
-                url = "https://github.com/vsnappy1/ResourceManager"
-
-                licenses {
-                    license {
-                        name = "The Apache License, Version 2.0"
-                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                    }
-                }
-
-                developers {
-                    developer {
-                        name = "Vishal Kumar"
-                        email = "vsnappy1@gmail.com"
-                        organization = "Randos"
-                        organizationUrl = "https://www.randos.dev"
-                    }
-                }
-
-                scm {
-                    connection = "scm:git:git://github.com/vsnappy1/ResourceManager.git"
-                    developerConnection =
-                        "scm:git:ssh://github.com/vsnappy1/ResourceManager.git"
+                pom {
+                    name = "${groupId}:${artifactId}"
+                    description =
+                        "An Android library that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g. ViewModel) using generated code."
                     url = "https://github.com/vsnappy1/ResourceManager"
+
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            name = "Vishal Kumar"
+                            email = "vsnappy1@gmail.com"
+                            organization = "Randos"
+                            organizationUrl = "https://www.randos.dev"
+                        }
+                    }
+
+                    scm {
+                        connection = "scm:git:git://github.com/vsnappy1/ResourceManager.git"
+                        developerConnection =
+                            "scm:git:ssh://github.com/vsnappy1/ResourceManager.git"
+                        url = "https://github.com/vsnappy1/ResourceManager"
+                    }
                 }
             }
         }
