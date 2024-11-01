@@ -9,6 +9,8 @@ plugins {
     id("maven-publish")
 }
 
+apply("gradle/migration.gradle.kts")
+
 /**
  * Retrieves the KSP (Kotlin Symbol Processing) version to be used in the project.
  *
