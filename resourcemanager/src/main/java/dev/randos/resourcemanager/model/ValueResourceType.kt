@@ -4,7 +4,7 @@ package dev.randos.resourcemanager.model
  * Sealed class representing various types of value resources in an android application.
  */
 internal sealed class ValueResourceType{
-    data object String: ValueResourceType()
+    data class String(val isParameterized: kotlin.Boolean = false) : ValueResourceType()
     data object Color: ValueResourceType()
     data object Boolean: ValueResourceType()
     data object Integer: ValueResourceType()

@@ -63,7 +63,8 @@ internal class XmlParser {
 
             when (tagName) {
                 STRING_TAG -> {
-                    resources.add(ValueResource(attributeName, ValueResourceType.String))
+                    val isParameterized = node.textContent.contains(Regex("%s|%d|%f|%x|%o|%c|%e"))
+                    resources.add(ValueResource(attributeName, ValueResourceType.String(isParameterized)))
                 }
 
                 COLOR_TAG -> {

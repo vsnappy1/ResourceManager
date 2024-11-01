@@ -20,6 +20,7 @@ internal class ClassFileGenerator {
                 appendLine("package $packageName\n")
                 appendLine("import android.app.Application")
                 appendLine("import android.graphics.drawable.Drawable")
+                appendLine("import android.content.res.Resources.Theme")
                 appendLine("import ${namespace}.R\n")
                 appendLine("object ResourceManager {\n")
                 appendLine("\tprivate var _application: Application? = null")
@@ -54,23 +55,32 @@ internal class ClassFileGenerator {
         }
 
         private fun StringBuilder.generateObjectForValueResources(resource: Resource) {
+            val map = mutableMapOf<String, MutableList<ValueResource>>()
             resource.directoryPath.listFiles().getXmlFiles().forEach { file ->
                 val resources = XmlParser.parseXML(file)
                 // Only create object for file when given file has some resources (i.e. not empty).
-                if (resources.isNotEmpty()) {
-                    val resourceObject = generateObject(
-                        file.nameWithoutExtension,
-                        resources
-                    )
-                    appendLine(resourceObject)
+                resources.forEach {
+                    val key = it.type::class.simpleName.toString()
+                    if(!map.containsKey(key)){
+                        map[key] = mutableListOf()
+                    }
+                    map[key]?.add(it)
                 }
+            }
+
+            map.forEach {
+                val resourceObject = generateObject(
+                    "${it.key}s",
+                    it.value.sortedBy { resource -> resource.name }
+                )
+                appendLine(resourceObject)
             }
         }
 
         private fun generateObject(name: String, pairs: List<ValueResource>): String {
             val defaultIndentation = "\t\t"
             return StringBuilder().apply {
-                appendLine("\tobject ${name.toCamelCase().replaceFirstChar { it.uppercase() }} {")
+                appendLine("\tobject $name {")
                 pairs.forEach { resource ->
                     when (resource.type) {
                         ValueResourceType.Array, ValueResourceType.StringArray -> appendStringArrayResource(
@@ -109,7 +119,7 @@ internal class ClassFileGenerator {
                             defaultIndentation
                         )
 
-                        ValueResourceType.String -> appendStringResource(
+                        is ValueResourceType.String -> appendStringResource(
                             resource,
                             defaultIndentation
                         )
@@ -134,7 +144,7 @@ internal class ClassFileGenerator {
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Int = application.resources.getColor(R.color.${resource.name}, application.theme)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.${resource.name}, theme)")
         }
 
         private fun StringBuilder.appendIntegerResource(
@@ -155,14 +165,18 @@ internal class ClassFileGenerator {
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : Float = application.resources.getFraction(R.fraction.${resource.name}, 0, 0)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(R.fraction.${resource.name}, base, pbase)")
         }
 
         private fun StringBuilder.appendStringResource(
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : String = application.resources.getString(R.string.${resource.name})")
+            if (resource.type is ValueResourceType.String && resource.type.isParameterized) {
+                appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(vararg args: Any = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(R.string.${resource.name}) else application.resources.getString(R.string.${resource.name}, *args)")
+            } else {
+                appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}() : String = application.resources.getString(R.string.${resource.name})")
+            }
         }
 
         private fun StringBuilder.appendPluralResource(
