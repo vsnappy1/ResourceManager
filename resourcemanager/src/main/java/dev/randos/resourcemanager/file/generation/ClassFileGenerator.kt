@@ -93,7 +93,11 @@ internal class ClassFileGenerator {
                             defaultIndentation
                         )
 
-                        ValueResourceType.Color -> appendColorResource(resource, defaultIndentation)
+                        ValueResourceType.Color -> appendColorResource(
+                            resource,
+                            defaultIndentation
+                        )
+
                         ValueResourceType.Dimension -> appendDimensionResource(
                             resource,
                             defaultIndentation
@@ -130,7 +134,7 @@ internal class ClassFileGenerator {
         }
 
         private fun StringBuilder.appendDrawableResource(name: String, defaultIndentation: String) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${name.toCamelCase()}() : Drawable = application.resources.getDrawable(R.drawable.${name}, application.theme)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${name.toCamelCase()}(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.${name}, theme)")
         }
 
         private fun StringBuilder.appendDimensionResource(
@@ -183,7 +187,7 @@ internal class ClassFileGenerator {
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(quantity: Int) : String = application.resources.getQuantityString(R.plurals.${resource.name}, quantity)")
+            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(R.plurals.${resource.name}, quantity, args)")
         }
 
         private fun StringBuilder.appendStringArrayResource(

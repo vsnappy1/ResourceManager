@@ -87,11 +87,7 @@ internal class XmlParser {
                     resources.add(ValueResource(attributeName, ValueResourceType.Fraction))
                 }
 
-                ARRAY_TAG -> {
-                    resources.add(ValueResource(attributeName, ValueResourceType.Array))
-                }
-
-                STRING_ARRAY_TAG -> {
+                STRING_ARRAY_TAG, ARRAY_TAG -> {
                     resources.add(ValueResource(attributeName, ValueResourceType.StringArray))
                 }
 
