@@ -1,22 +1,23 @@
+val common = "(?:\\w+(?:\\.\\w+|\\(.*\\))*)*\\s*"
 val replacements: Map<Regex, String> by lazy {
     mapOf(
-        Regex("(?:\\w+\\s*\\.)*\\s*getString\\(\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Strings.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getString\\(\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Strings.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getString\\(\\s*\\w+\\s*,\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Strings.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getColor\\(\\s*R\\.\\s*color\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Colors.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getColor\\(\\s*R\\.\\s*color\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Colors.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getColor\\(\\s*\\w+\\s*,\\s*R\\.\\s*color\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Colors.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getDrawable\\(\\s*R\\.\\s*drawable\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Drawables.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getDrawable\\(\\s*R\\.\\s*drawable\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Drawables.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getDrawable\\(\\s*\\w+\\s*,\\s*R\\.\\s*drawable\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Drawables.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getStringArray\\(\\s*R\\.\\s*array\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.StringArrays.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getIntArray\\(\\s*R\\.\\s*array\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.IntArrays.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getBoolean\\(\\s*R\\.\\s*bool\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Booleans.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getFraction\\(\\s*R\\.\\s*fraction\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Fractions.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getDimension\\(\\s*R\\.\\s*dimen\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Dimensions.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getInteger\\(\\s*R\\.\\s*integer\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Integers.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getFraction\\(\\s*R\\.\\s*fraction\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Fractions.",
-        Regex("(?:\\w+\\s*\\.)*\\s*getQuantityString\\(\\s*R\\.\\s*plurals\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Plurals."
+        Regex("${common}.getString\\(\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Strings.",
+        Regex("${common}.getString\\(\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Strings.",
+        Regex("${common}.getString\\(\\s*\\w+\\s*,\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Strings.",
+        Regex("${common}.getColor\\(\\s*R\\.\\s*color\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Colors.",
+        Regex("${common}.getColor\\(\\s*R\\.\\s*color\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Colors.",
+        Regex("${common}.getColor\\(\\s*\\w+\\s*,\\s*R\\.\\s*color\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Colors.",
+        Regex("${common}.getDrawable\\(\\s*R\\.\\s*drawable\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Drawables.",
+        Regex("${common}.getDrawable\\(\\s*R\\.\\s*drawable\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Drawables.",
+        Regex("${common}.getDrawable\\(\\s*\\w+\\s*,\\s*R\\.\\s*drawable\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Drawables.",
+        Regex("${common}.getStringArray\\(\\s*R\\.\\s*array\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.StringArrays.",
+        Regex("${common}.getIntArray\\(\\s*R\\.\\s*array\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.IntArrays.",
+        Regex("${common}.getBoolean\\(\\s*R\\.\\s*bool\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Booleans.",
+        Regex("${common}.getFraction\\(\\s*R\\.\\s*fraction\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Fractions.",
+        Regex("${common}.getDimension\\(\\s*R\\.\\s*dimen\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Dimensions.",
+        Regex("${common}.getInteger\\(\\s*R\\.\\s*integer\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Integers.",
+        Regex("${common}.getFraction\\(\\s*R\\.\\s*fraction\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Fractions.",
+        Regex("${common}.getQuantityString\\(\\s*R\\.\\s*plurals\\.\\s*(\\w+)\\s*,\\s*(.*)\\s*\\)") to "ResourceManager.Plurals."
     )
 }
 
