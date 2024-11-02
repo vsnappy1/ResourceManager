@@ -260,7 +260,7 @@ afterEvaluate {
                 from(components["java"])
                 groupId = "dev.randos"
                 artifactId = "resourcemanager"
-                version = "1.0.0"
+                version = "1.0.1"
 
                 val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
                 artifact(bundle)
