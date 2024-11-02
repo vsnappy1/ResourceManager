@@ -26,6 +26,7 @@ internal class ClassFileGenerator {
                 appendLine("\tprivate var _application: Application? = null")
                 appendLine("\tprivate val application: Application")
                 appendLine("\t\tget() = _application ?: throw IllegalStateException(\"ResourceManager is not initialized. Please call ResourceManager.initialize(this) in your Application class.\")\n")
+                appendLine("\t@JvmStatic")
                 appendLine("\tfun initialize(application: Application) {")
                 appendLine("\t\t_application = application")
                 appendLine("\t}\n")
@@ -134,7 +135,7 @@ internal class ClassFileGenerator {
         }
 
         private fun StringBuilder.appendDrawableResource(name: String, defaultIndentation: String) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${name.toCamelCase()}(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.${name}, theme)")
+            appendLine("${defaultIndentation}@JvmOverloads @JvmStatic fun ${name.toCamelCase()}(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.${name}, theme)")
         }
 
         private fun StringBuilder.appendDimensionResource(
@@ -148,7 +149,7 @@ internal class ClassFileGenerator {
             resource: ValueResource,
             defaultIndentation: String
         ) {
-            appendLine("${defaultIndentation}@JvmStatic fun ${resource.name.toCamelCase()}(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.${resource.name}, theme)")
+            appendLine("${defaultIndentation}@JvmOverloads @JvmStatic fun ${resource.name.toCamelCase()}(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.${resource.name}, theme)")
         }
 
         private fun StringBuilder.appendIntegerResource(
