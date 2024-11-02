@@ -1,4 +1,6 @@
 val common = "(?:\\w+(?:\\.\\w+|\\(.*\\))*)*\\s*"
+val importStatementRegex = Regex("import ([a-zA-Z0-9_.]+).R;?\\s")
+
 val replacements: Map<Regex, String> by lazy {
     mapOf(
         Regex("${common}.getString\\(\\s*R\\.\\s*string\\.\\s*(\\w+)\\s*\\)") to "ResourceManager.Strings.",
@@ -57,6 +59,16 @@ tasks.register("migrateToResourceManager") {
     codeFiles.forEach { file ->
         var changesCount = 0
         var content = file.readText()
+
+        // Update import statement if present
+        importStatementRegex.find(content)?.let { matchResult ->
+            if (matchResult.groups.size == 2) {
+                val semiColan = if (file.extension == "java") ";" else ""
+                val newImportStatement =
+                    "import ${matchResult.groups[1]?.value}.ResourceManager$semiColan"
+                content = content.replace(matchResult.value, newImportStatement)
+            }
+        }
 
         replacements.forEach { (regex, s) ->
             val matches = regex.findAll(content)
