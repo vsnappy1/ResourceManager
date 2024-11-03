@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "ResourceProvider"
 include(":app")
 include(":resourcemanager")
+include(":resourcemanager-runtime")

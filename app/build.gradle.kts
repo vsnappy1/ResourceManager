@@ -62,7 +62,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation ("androidx.compose.runtime:runtime-livedata:1.7.4")
 
-    implementation(project(":resourcemanager"))
+    implementation(project(":resourcemanager-runtime"))
     ksp(project(":resourcemanager"))
 
     testImplementation(libs.junit)

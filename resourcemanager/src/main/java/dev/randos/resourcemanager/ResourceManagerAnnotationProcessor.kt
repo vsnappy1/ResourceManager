@@ -16,20 +16,19 @@ internal class ResourceManagerAnnotationProcessor(
 ) : SymbolProcessor {
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
+    private val annotationQualifiedName = "dev.randos.resourcemanager.runtime.InstallResourceManager"
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("Processing annotations")
 
-        val symbols =
-            resolver.getSymbolsWithAnnotation(InstallResourceManager::class.qualifiedName!!)
-
+        val symbols = resolver.getSymbolsWithAnnotation(annotationQualifiedName)
         symbols.filterIsInstance<KSClassDeclaration>().forEach {
             val containingFile = it.containingFile
             if (containingFile != null) {
                 val className = it.simpleName.asString()
                 val packageName = it.packageName.asString()
                 val file = codeGenerator.createNewFile(
-                    // TODO pass in the list of files in Dependency so ksp can observe and when these files changes only then regenerate code otherwise not.
+                    // TODO Pass in the list of files in Dependency so ksp can observe and when these files changes only then regenerate code otherwise not.
                     dependencies = Dependencies(true, containingFile),
                     packageName = packageName,
                     fileName = "ResourceManager"
@@ -52,7 +51,7 @@ internal class ResourceManagerAnnotationProcessor(
 
     private fun getNameSpace(it: KSClassDeclaration): String? {
         val namespaceAnnotation =
-            it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == InstallResourceManager::class.qualifiedName }
+            it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == annotationQualifiedName }
         val namespace = namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
         if (namespace?.isEmpty() == true) return null
         return namespace

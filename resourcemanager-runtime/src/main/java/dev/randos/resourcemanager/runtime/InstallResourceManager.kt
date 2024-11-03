@@ -1,4 +1,4 @@
-package dev.randos.resourcemanager
+package dev.randos.resourcemanager.runtime
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

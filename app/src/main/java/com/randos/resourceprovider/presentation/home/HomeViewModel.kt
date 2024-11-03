@@ -9,13 +9,12 @@ import com.randos.resourceprovider.ResourceManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class HomeViewModel: ViewModel() {
+class HomeViewModel : ViewModel() {
 
     private val _uiState = MutableLiveData(HomeScreenState())
     val uiState: LiveData<HomeScreenState> = _uiState
 
-
-    fun getData(){
+    fun getData() {
         viewModelScope.launch {
             delay(1000)
             _uiState.postValue(HomeScreenState(text = ResourceManager.Strings.test()))
