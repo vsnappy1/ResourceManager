@@ -259,8 +259,8 @@ afterEvaluate {
             create<MavenPublication>("java") {
                 from(components["java"])
                 groupId = "dev.randos"
-                artifactId = "resourcemanager"
-                version = "1.0.1"
+                artifactId = "resourcemanager-compiler"
+                version = "0.0.1"
 
                 val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
                 artifact(bundle)
