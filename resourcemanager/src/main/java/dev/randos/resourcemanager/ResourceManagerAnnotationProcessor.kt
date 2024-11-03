@@ -29,7 +29,8 @@ internal class ResourceManagerAnnotationProcessor(
                 val className = it.simpleName.asString()
                 val packageName = it.packageName.asString()
                 val file = codeGenerator.createNewFile(
-                    dependencies = Dependencies(false),
+                    // TODO pass in the list of files in Dependency so ksp can observe and when these files changes only then regenerate code otherwise not.
+                    dependencies = Dependencies(true, containingFile),
                     packageName = packageName,
                     fileName = "ResourceManager"
                 )
