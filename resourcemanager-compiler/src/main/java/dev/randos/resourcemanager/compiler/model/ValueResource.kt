@@ -1,4 +1,4 @@
-package dev.randos.resourcemanager.model
+package dev.randos.resourcemanager.compiler.model
 
 /**
  * Represents a value resource in the application.

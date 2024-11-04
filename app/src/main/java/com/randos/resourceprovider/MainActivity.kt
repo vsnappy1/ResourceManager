@@ -19,6 +19,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val viewModel = ViewModelProvider(this)[HomeViewModel::class]
         setContent {
+
+
             ResourceProviderTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     HomeScreen(

@@ -1,4 +1,4 @@
-package dev.randos.resourcemanager.manager
+package dev.randos.resourcemanager.compiler.manager
 
 import java.io.File
 import java.time.LocalDateTime

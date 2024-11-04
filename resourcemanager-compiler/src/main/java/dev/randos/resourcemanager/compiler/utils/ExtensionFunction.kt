@@ -1,4 +1,4 @@
-package dev.randos.resourcemanager.utils
+package dev.randos.resourcemanager.compiler.utils
 
 // Function to convert snake_case to camelCase
 internal fun String.toCamelCase(): String {

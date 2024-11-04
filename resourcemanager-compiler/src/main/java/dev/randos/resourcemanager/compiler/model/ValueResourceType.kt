@@ -1,4 +1,4 @@
-package dev.randos.resourcemanager.model
+package dev.randos.resourcemanager.compiler.model
 
 /**
  * Sealed class representing various types of value resources in an android application.

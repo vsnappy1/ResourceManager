@@ -1,4 +1,4 @@
-package dev.randos.resourcemanager.model
+package dev.randos.resourcemanager.compiler.model
 
 import java.io.File
 
