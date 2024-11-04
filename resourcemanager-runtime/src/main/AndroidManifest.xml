@@ -13,8 +13,8 @@
             if there are multiple ContentProviders.
         -->
         <provider
-            android:name="dev.randos.resourcemanager.runtime.ResourceManagerContentProvider"
-            android:authorities="dev.randos.resourcemanager.runtime.ResourceManagerContentProvider"
+            android:name="dev.randos.resourcemanager.ResourceManagerContentProvider"
+            android:authorities="dev.randos.resourcemanager.ResourceManagerContentProvider"
             android:exported="false"
             android:initOrder="100" />
     </application>

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.randos.resourcemanager.runtime"
+    namespace = "dev.randos.resourcemanager"
     compileSdk = 34
 
     defaultConfig {

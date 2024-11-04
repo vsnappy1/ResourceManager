@@ -17,8 +17,7 @@ internal class ResourceManagerAnnotationProcessor(
 ) : SymbolProcessor {
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
-    private val annotationQualifiedName =
-        "dev.randos.resourcemanager.runtime.InstallResourceManager"
+    private val annotationQualifiedName = "dev.randos.resourcemanager.InstallResourceManager"
     private lateinit var cacheManager: CacheManager
 
     override fun process(resolver: Resolver): List<KSAnnotated> {

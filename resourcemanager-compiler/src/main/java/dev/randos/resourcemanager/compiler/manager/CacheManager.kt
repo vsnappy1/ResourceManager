@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
  * @property buildDirectory The build directory where cache and generated files are located.
  * @property filesUnderObservation A list of files whose last modified timestamps are observed for changes.
  */
-class CacheManager(
+internal class CacheManager(
     private val buildDirectory: File?,
     private val filesUnderObservation: List<File>
 ) {
