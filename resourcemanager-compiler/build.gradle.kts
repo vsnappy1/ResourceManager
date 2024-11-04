@@ -99,7 +99,7 @@ tasks.register<GenerateMavenPom>("generatePom") {
 tasks.register("generateArtifacts") {
     group = "build"
     description = "Generates base JAR, javadoc JAR, sources JAR, and POM file."
-    dependsOn(":resourcemanager:build", "generateJavadocJar", "generateSourcesJar", "generatePom")
+    dependsOn(":resourcemanager-compiler:build", "generateJavadocJar", "generateSourcesJar", "generatePom")
     doLast {
         println("Generated file: ${fullArtifactName}.jar")
         println("Generated file: ${fullArtifactName}-javadoc.jar")
