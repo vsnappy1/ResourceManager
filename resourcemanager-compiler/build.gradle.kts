@@ -82,7 +82,6 @@ tasks.register<GenerateChecksumTask>("generateChecksum") {
     group = "verification"
     description = "Generates MD5 and SHA-1 checksums for specified files."
     filesToChecksum = artifacts
-    mustRunAfter("generateArtifacts")
 }
 
 /* ----------------- Sign Artifacts ----------------- */
@@ -93,7 +92,6 @@ tasks.register<SignArtifactsTask>("signArtifacts") {
     description = "Signs all artifacts with GPG/PGP."
     filesToSign = artifacts
     passphrase = getSecret("GPG_PASSPHRASE")
-    mustRunAfter("generateArtifacts")
 }
 
 fun getSecret(name: String): String {
@@ -119,7 +117,6 @@ tasks.register<Zip>("generateBundle") {
     destinationDirectory = file(layout.buildDirectory.dir("publish/bundle"))
     from(artifactRepo.parentFile.parentFile.parentFile.parentFile)
     doLast { println("Bundle generated.") }
-    mustRunAfter("generateArtifacts", "generateChecksum", "signArtifacts")
 }
 
 /* ----------------- Maven Publish (Meta data) ----------------- */
