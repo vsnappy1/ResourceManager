@@ -23,14 +23,12 @@ android {
         }
     }
 
-    val properties = Properties()
-    properties.load(rootProject.file("local.properties").inputStream())
     signingConfigs {
         create("release"){
-            keyAlias = "${properties["keyAlias"]}"
-            keyPassword = "${properties["keyPassword"]}"
+            keyAlias = getSecret("KEY_ALIAS")
+            keyPassword = getSecret("KEY_PASSWORD")
             storeFile = file("keystore.jks")
-            storePassword = "${properties["storePassword"]}"
+            storePassword = getSecret("STORE_PASSWORD")
         }
     }
 
@@ -88,4 +86,18 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+fun getSecret(name: String): String {
+    // Load passphrase from local.properties or environment variable
+    val properties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+
+    // Check if local.properties exists
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+
+    return properties.getProperty(name) ?: System.getenv(name)
+    ?: throw GradleException("$name not found in local.properties or environment variables.")
 }
