@@ -98,6 +98,5 @@ fun getSecret(name: String): String {
         properties.load(localPropertiesFile.inputStream())
     }
 
-    return properties.getProperty(name) ?: System.getenv(name)
-    ?: throw GradleException("$name not found in local.properties or environment variables.")
+    return properties.getProperty(name) ?: "---"
 }
