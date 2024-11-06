@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import java.util.Properties
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -65,6 +66,8 @@ val artifactRepo: File by lazy {
     file(layout.buildDirectory.dir(path))
 }
 
+val publishBundleRepo: File by lazy { file(layout.buildDirectory.dir("publish/bundle"))}
+
 val fullArtifactName: String by lazy {
     "${mavenPublication.artifactId}-${mavenPublication.version}"
 }
@@ -102,6 +105,7 @@ tasks.register<Jar>("generateSourcesJar"){
     archiveClassifier.set("sources")
     destinationDirectory.set(artifactRepo)
     from(android.sourceSets.getByName("main").java.srcDirs)
+    dependsOn("generateProjectDetailsClass")
 }
 
 tasks.register<Javadoc>("javadoc") {
@@ -174,7 +178,7 @@ tasks.register<Zip>("generateBundle") {
     group = "build" // or any other logical grouping you prefer
     description = "Creates a ZIP bundle of the generated artifacts for distribution."
     archiveFileName = "$fullArtifactName.zip"
-    destinationDirectory = file(layout.buildDirectory.dir("publish/bundle"))
+    destinationDirectory = publishBundleRepo
     from(artifactRepo.parentFile.parentFile.parentFile.parentFile)
     doLast { println("Bundle generated.") }
 }
@@ -187,7 +191,7 @@ publishing {
             artifactId = "resourcemanager-runtime"
             version = "0.0.1"
 
-            val bundle = file(layout.buildDirectory.dir("zip/bundle.zip"))
+            val bundle = file("${publishBundleRepo.absolutePath}/$artifactId-$version.zip")
             artifact(bundle)
 
             pom {
