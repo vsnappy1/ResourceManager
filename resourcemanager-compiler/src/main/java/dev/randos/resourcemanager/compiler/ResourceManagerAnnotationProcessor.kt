@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import dev.randos.resourcemanager.InstallResourceManager
 import dev.randos.resourcemanager.compiler.file.generation.ClassFileGenerator
 import dev.randos.resourcemanager.compiler.manager.CacheManager
 import dev.randos.resourcemanager.compiler.model.Resource
@@ -17,14 +18,13 @@ internal class ResourceManagerAnnotationProcessor(
 ) : SymbolProcessor {
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
-    private val annotationQualifiedName = "dev.randos.resourcemanager.InstallResourceManager"
     private lateinit var cacheManager: CacheManager
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("Processing annotations")
 
         // Get all symbols annotated with [InstallResourceManager] annotation.
-        val symbols = resolver.getSymbolsWithAnnotation(annotationQualifiedName)
+        val symbols = resolver.getSymbolsWithAnnotation(InstallResourceManager::class.java.name)
             .filterIsInstance<KSClassDeclaration>()
 
         val unprocessedSymbols = mutableListOf<KSAnnotated>()
@@ -88,7 +88,7 @@ internal class ResourceManagerAnnotationProcessor(
 
     private fun getNameSpace(it: KSClassDeclaration): String? {
         val namespaceAnnotation =
-            it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == annotationQualifiedName }
+            it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == InstallResourceManager::class.java.name }
         val namespace = namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
         if (namespace?.isEmpty() == true) return null
         return namespace

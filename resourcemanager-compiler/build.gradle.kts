@@ -24,6 +24,7 @@ val kspVersion: String = project.findProperty("kspVersion").toString()
 
 dependencies {
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+    implementation(project(":resourcemanager-runtime"))
 }
 
 java {

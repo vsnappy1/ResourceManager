@@ -17,7 +17,12 @@ class HomeViewModel : ViewModel() {
     fun getData() {
         viewModelScope.launch {
             delay(1000)
-            _uiState.postValue(HomeScreenState(text = ResourceManager.Strings.test()))
+            try {
+                _uiState.postValue(HomeScreenState(text = ResourceManager.Strings.test()))
+
+            } catch (e: Exception) {
+                _uiState.postValue(HomeScreenState(text = e.localizedMessage?:"---"))
+            }
             Log.d("TAG", "getData: ")
         }
     }

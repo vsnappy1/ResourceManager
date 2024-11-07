@@ -1,57 +1,22 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import java.util.Properties
-import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    id("java-library")
+    id("org.jetbrains.kotlin.jvm")
     id("maven-publish")
 }
 
-android {
-    namespace = "dev.randos.resourcemanager"
-    compileSdk = 34
-
-    defaultConfig {
-        minSdk = 23
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 kotlin {
-    sourceSets {
-        main {
-            /*
-             Adds the specified generated directory as a source for Kotlin files.
-             This allows Kotlin compiler to recognize and include code files generated during the
-             build process as part of the "main" source set.
-             */
-            kotlin.srcDir(layout.buildDirectory.dir("generated/project/main"))
-        }
-    }
+    jvmToolchain(8)
 }
 
 val mavenPublication: MavenPublication by lazy {
-    (publishing.publications.getByName("release") as MavenPublication)
+    (publishing.publications.getByName("java") as MavenPublication)
 }
 
 val artifactRepo: File by lazy {
@@ -74,7 +39,7 @@ val fullArtifactName: String by lazy {
 
 val artifacts: List<File> by lazy {
     listOf(
-        file("${artifactRepo}/${fullArtifactName}.aar"),
+        file("${artifactRepo}/${fullArtifactName}.jar"),
         file("${artifactRepo}/${fullArtifactName}-javadoc.jar"),
         file("${artifactRepo}/${fullArtifactName}-sources.jar"),
         file("${artifactRepo}/${fullArtifactName}.pom")
@@ -83,60 +48,13 @@ val artifacts: List<File> by lazy {
 
 /* ----------------- Generate Artifacts ----------------- */
 
-tasks.register("generateAar") {
-    dependsOn("assembleRelease")
-    doLast {
-        val aarFile = file(layout.buildDirectory.dir("outputs/aar/${project.name}-release.aar"))
-
-        // Create the destination directory if it doesn't exist
-        artifactRepo.mkdirs()
-
-        // Copy the AAR file to the destination directory
-        copy {
-            from(aarFile)
-            rename { it.replace("${project.name}-release", fullArtifactName) }
-            into(artifactRepo)
-        }
-    }
-}
-
-tasks.register<Jar>("generateSourcesJar"){
-    archiveBaseName.set(fullArtifactName)
-    archiveClassifier.set("sources")
-    destinationDirectory.set(artifactRepo)
-    from(android.sourceSets.getByName("main").java.srcDirs)
-    dependsOn("generateProjectDetailsClass")
-}
-
-tasks.register<Javadoc>("javadoc") {
-    isFailOnError = false
-    source = android.sourceSets.getByName("main").java.getSourceFiles()
-    classpath += project.files(android.bootClasspath.joinToString(File.separator))
-    setDestinationDir(file(layout.buildDirectory.dir("docs/javadoc")))
-}
-
-tasks.register<Jar>("generateJavadocJar") {
-    archiveBaseName.set(fullArtifactName)
-    archiveClassifier.set("javadoc") // Correct the classifier to "javadoc"
-    destinationDirectory.set(artifactRepo)
-
-    // Use the output directory of the Javadoc task
-    from(tasks.named<Javadoc>("javadoc").get().destinationDir)
-
-    // Make sure this task depends on the Javadoc task
-    dependsOn("javadoc")
-}
-
-tasks.register<GenerateMavenPom>("generatePom"){
-    destination = File(artifactRepo, "$fullArtifactName.pom")
-    pom = mavenPublication.pom
-}
-
-tasks.register("generateArtifacts") {
+tasks.register<GenerateArtifactsTask>("generateArtifacts") {
     group = "build"
-    description = "Generates base JAR, javadoc JAR, sources JAR, and POM file."
+    description = "Generates base AAR, javadoc JAR, sources JAR, and POM file."
+    artifactNameWithVersion = fullArtifactName
+    outputDirectory = artifactRepo
+    pom = mavenPublication.pom
     artifactRepo.mkdirs()
-    dependsOn("generateAar", "generateJavadocJar", "generateSourcesJar", "generatePom")
 }
 
 /* ----------------- Generate CheckSum ----------------- */
@@ -186,7 +104,7 @@ tasks.register<Zip>("generateBundle") {
 /* ----------------- Maven Publish (Meta data) ----------------- */
 publishing {
     publications {
-        register<MavenPublication>("release") {
+        register<MavenPublication>("java") {
             groupId = "dev.randos"
             artifactId = "resourcemanager-runtime"
             version = "0.0.1"
@@ -224,68 +142,8 @@ publishing {
                 }
             }
             afterEvaluate {
-                from(components["release"])
+                from(components["java"])
             }
         }
     }
-}
-
-
-tasks.register("generateProjectDetailsClass") {
-    group = "generation"
-    description =
-        "Generates a ProjectDetails.kt file containing a list of package names for all modules in the project."
-
-    // Gather all module names
-    val packages = rootProject.subprojects.map {
-        it.extensions.findByType<com.android.build.gradle.BaseExtension>()?.let { module ->
-            module.namespace
-                ?: getPackageNameFromManifestFile(it.file("src/main/AndroidManifest.xml"))
-        }
-    }
-
-    // Define output directory and file path within the build directory
-    val outputFile =
-        layout.buildDirectory.file("generated/project/main/ProjectDetails.kt").get().asFile
-
-    // Optimization: Define the input properties and output file here to allow Gradle to cache the
-    // task result and skip execution if the input properties and output file are already up-to-date.
-    inputs.properties(Pair("packages", packages))
-    outputs.file(outputFile)
-
-    doLast {
-        // Build the content for the ProjectDetails class
-        val packagesString = packages.filterNotNull().joinToString(",") { "\"$it\"" }
-        val projectDetailsClassContent = StringBuilder().apply {
-            appendLine("package dev.randos.resourcemanager.runtime")
-            appendLine()
-            appendLine("internal object ProjectDetails {")
-            appendLine("\tfun packages() = listOf($packagesString)")
-            appendLine("}")
-        }.toString()
-
-        // Ensure the output directory exists
-        outputFile.parentFile.mkdirs()
-
-        // Write content to the file
-        try {
-            outputFile.writeText(projectDetailsClassContent)
-        } catch (e: Exception) {
-            println("Failed to generate ProjectDetails.kt: ${e.message}")
-        }
-    }
-}
-
-// Ensure `generateProjectDetailsClass` runs when resourcemanager-runtime module is compiled.
-project(":resourcemanager-runtime").tasks.matching { it.name.startsWith("compile") }
-    .configureEach {
-        dependsOn("generateProjectDetailsClass")
-    }
-
-// Helper function to retrieve the package name from an AndroidManifest.xml file.
-fun getPackageNameFromManifestFile(file: File): String? {
-    if (!file.exists()) return null
-    val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
-    document.documentElement.normalize()
-    return document.documentElement.getAttribute("package")
 }
