@@ -129,10 +129,7 @@ publishing {
             from(components["java"])
             groupId = "dev.randos"
             artifactId = "resourcemanager-compiler"
-            version = "0.0.2"
-
-            val bundle = file("${publishBundleRepo.absolutePath}/$artifactId-$version.zip")
-            artifact(bundle)
+            version = "0.0.3"
 
             pom {
                 name = "${groupId}:${artifactId}"

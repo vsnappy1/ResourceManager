@@ -1,7 +1,7 @@
 # ResourceManager
 ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code. It supports both Kotlin and Java projects.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.randos/resourcemanager-runtime.svg)](https://central.sonatype.com/artifact/dev.randos/resourcemanager-runtime)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.randos/resourcemanager-compiler.svg)](https://central.sonatype.com/artifact/dev.randos/resourcemanager-compiler)
 ![Platform Support](https://img.shields.io/badge/platform-Android-brightgreen.svg)
 
 ## Setup
@@ -57,14 +57,6 @@ class MyApplication: Application() {
     }
 }
 ```
-__Note:__ 
-If your `Application` class is located in the root package (e.g., `com.example.yourapp`), you don’t need to specify a namespace. However, if your Application class is in a sub-package (e.g., `com.example.yourapp.app`), you must specify the namespace in the annotation to correctly reference the resources.
-```kotlin
-@InstallResourceManager(namespace = "com.example.yourapp")  // Specify the namespace if Application is in a sub-package
-    class MyApplication: Application() {
-        ...
-}
-```
 
 ## Usage
 Here’s an example of how to use ResourceManager in a ViewModel
@@ -86,6 +78,14 @@ To ensure that ResourceManager works correctly with __*ProGuard*__ or __*R8*__, 
 # Keep all classes named ResourceManager, regardless of their package, and retain the initialize method.
 -keepclassmembers class **.ResourceManager {
     public void initialize(android.app.Application);
+}
+```
+__Note:__
+If your namespace (i.e., `com.example.yourapp`) is different than module package structure (e.g., `com/example/yourapp2/app`), then you must specify the namespace in the annotation to correctly reference the resources. (i.e., `com.example.yourapp.R`)
+```kotlin
+@InstallResourceManager(namespace = "com.example.yourapp")
+    class MyApplication: Application() {
+        ...
 }
 ```
 

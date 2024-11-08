@@ -12,12 +12,11 @@ internal class ClassFileGenerator {
 
     companion object {
         fun generateClassFile(
-            packageName: String,
             namespace: String,
             files: List<Resource>
         ): String {
             return StringBuilder().apply {
-                appendLine("package $packageName\n")
+                appendLine("package $namespace\n")
                 appendLine("import android.app.Application")
                 appendLine("import android.graphics.drawable.Drawable")
                 appendLine("import android.content.res.Resources.Theme")

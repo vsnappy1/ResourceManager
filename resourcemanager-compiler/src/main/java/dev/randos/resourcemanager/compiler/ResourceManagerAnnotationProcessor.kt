@@ -29,6 +29,9 @@ internal class ResourceManagerAnnotationProcessor(
 
         val unprocessedSymbols = mutableListOf<KSAnnotated>()
 
+        // Get the namespace
+        val namespace = resolver.getAllFiles().firstOrNull()?.packageName?.asString()
+
         for (symbol in symbols) {
             val containingFile = symbol.containingFile ?: continue
             val annotatedFile = File(containingFile.filePath)
@@ -63,8 +66,7 @@ internal class ResourceManagerAnnotationProcessor(
 
                     if (classFile == null) {
                         classFile = ClassFileGenerator.generateClassFile(
-                            packageName = packageName,
-                            namespace = getNameSpace(symbol) ?: packageName,
+                            namespace = getNamespace(symbol) ?: namespace ?: packageName,
                             files = resources
                         )
                     }
@@ -86,7 +88,7 @@ internal class ResourceManagerAnnotationProcessor(
         return unprocessedSymbols
     }
 
-    private fun getNameSpace(it: KSClassDeclaration): String? {
+    private fun getNamespace(it: KSClassDeclaration): String? {
         val namespaceAnnotation =
             it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == InstallResourceManager::class.java.name }
         val namespace = namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
