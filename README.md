@@ -72,15 +72,19 @@ class MyViewModel : ViewModel() {
 }
 ```
 
-__Note:__
+
+## Configuration for ResourceManager Compatibility
+* __Note:__
 To ensure that ResourceManager works correctly with __*ProGuard*__ or __*R8*__, add the following rule to your `proguard-rules.pro` file:
 ```python
 # Keep all classes named ResourceManager, regardless of their package, and retain the initialize method.
 -keepclassmembers class **.ResourceManager {
     public void initialize(android.app.Application);
 }
+
+
 ```
-__Note:__
+* __Note:__
 If your namespace (i.e., `com.example.yourapp`) is different than module package structure (e.g., `com/example/yourapp2/app`), then you must specify the namespace in the annotation to correctly reference the resources. (i.e., `com.example.yourapp.R`)
 ```kotlin
 @InstallResourceManager(namespace = "com.example.yourapp")
