@@ -107,7 +107,7 @@ publishing {
         register<MavenPublication>("java") {
             groupId = "dev.randos"
             artifactId = "resourcemanager-runtime"
-            version = "0.0.1"
+            version = "0.0.2"
 
             val bundle = file("${publishBundleRepo.absolutePath}/$artifactId-$version.zip")
             artifact(bundle)
