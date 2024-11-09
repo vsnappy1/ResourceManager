@@ -129,7 +129,7 @@ publishing {
             from(components["java"])
             groupId = "dev.randos"
             artifactId = "resourcemanager-compiler"
-            version = "0.0.3"
+            version = "0.0.4"
 
             pom {
                 name = "${groupId}:${artifactId}"

@@ -107,7 +107,7 @@ publishing {
         register<MavenPublication>("java") {
             groupId = "dev.randos"
             artifactId = "resourcemanager-runtime"
-            version = "0.0.3"
+            version = "0.0.4"
 
             pom {
                 name = "${groupId}:${artifactId}"

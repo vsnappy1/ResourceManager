@@ -34,8 +34,8 @@ plugins {
 ...
 dependencies {
     ...
-    implementation("dev.randos:resourcemanager-runtime:0.0.2")    // Runtime dependency
-    ksp("dev.randos:resourcemanager-compiler:0.0.2")    // Compiler dependency for KSP
+    implementation("dev.randos:resourcemanager-runtime:0.0.4")    // Runtime dependency
+    ksp("dev.randos:resourcemanager-compiler:0.0.4")    // Compiler dependency for KSP
 }
 ```
 
@@ -71,25 +71,3 @@ class MyViewModel : ViewModel() {
     }
 }
 ```
-
-
-## Configuration for ResourceManager Compatibility
-* __Note:__
-To ensure that ResourceManager works correctly with __*ProGuard*__ or __*R8*__, add the following rule to your `proguard-rules.pro` file:
-```python
-# Keep all classes named ResourceManager, regardless of their package, and retain the initialize method.
--keepclassmembers class **.ResourceManager {
-    public void initialize(android.app.Application);
-}
-
-
-```
-* __Note:__
-If your namespace (i.e., `com.example.yourapp`) is different than module package structure (e.g., `com/example/yourapp2/app`), then you must specify the namespace in the annotation to correctly reference the resources. (i.e., `com.example.yourapp.R`)
-```kotlin
-@InstallResourceManager(namespace = "com.example.yourapp")
-    class MyApplication: Application() {
-        ...
-}
-```
-

@@ -31,8 +31,3 @@
 
 # Retain LocalLifecycleOwner
 -keep class * extends androidx.compose.runtime.CompositionLocal { *; }
-
-# Keep all classes named ResourceManager, regardless of their package, and retain the initialize method.
--keepclassmembers class **.ResourceManager {
-    public void initialize(android.app.Application);
-}

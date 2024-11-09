@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import dev.randos.resourcemanager.InstallResourceManager
 import dev.randos.resourcemanager.compiler.file.generation.ClassFileGenerator
 import dev.randos.resourcemanager.compiler.manager.CacheManager
+import dev.randos.resourcemanager.compiler.manager.ModuleManager
 import dev.randos.resourcemanager.compiler.model.Resource
 import dev.randos.resourcemanager.compiler.model.ResourceType
 import java.io.File
@@ -18,7 +19,7 @@ internal class ResourceManagerAnnotationProcessor(
 ) : SymbolProcessor {
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
-    private lateinit var cacheManager: CacheManager
+
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("Processing annotations")
@@ -29,19 +30,13 @@ internal class ResourceManagerAnnotationProcessor(
 
         val unprocessedSymbols = mutableListOf<KSAnnotated>()
 
-        // Get the namespace
-        val namespace = resolver.getAllFiles().firstOrNull()?.packageName?.asString()
-
         for (symbol in symbols) {
             val containingFile = symbol.containingFile ?: continue
             val annotatedFile = File(containingFile.filePath)
             val resources = getResources(annotatedFile)
             val packageName = symbol.packageName.asString()
-
-            cacheManager = CacheManager(
-                buildDirectory = annotatedFile.getPathToBuildDirectory(),
-                filesUnderObservation = resources.getFilesUnderObservation()
-            )
+            val moduleFile = getModuleRootFile(annotatedFile)
+            val moduleManager = ModuleManager(moduleFile!!)
 
             try {
                 // Create the new file with a dependency on `containingFile`
@@ -49,6 +44,11 @@ internal class ResourceManagerAnnotationProcessor(
                     dependencies = Dependencies(true, containingFile),
                     packageName = packageName,
                     fileName = "ResourceManager"
+                )
+
+                val cacheManager = CacheManager(
+                    buildDirectory = annotatedFile.getPathToBuildDirectory(),
+                    filesUnderObservation = resources.getFilesUnderObservation()
                 )
 
                 // Write the generated class content to the file
@@ -66,7 +66,7 @@ internal class ResourceManagerAnnotationProcessor(
 
                     if (classFile == null) {
                         classFile = ClassFileGenerator.generateClassFile(
-                            namespace = getNamespace(symbol) ?: namespace ?: packageName,
+                            namespace = moduleManager.getNamespace() ?: throw IllegalStateException("Namespace could not be found in either build.gradle, build.gradle.kts or AndroidManifest.xml. Please ensure the module is properly configured."),
                             files = resources
                         )
                     }
@@ -86,14 +86,6 @@ internal class ResourceManagerAnnotationProcessor(
             }
         }
         return unprocessedSymbols
-    }
-
-    private fun getNamespace(it: KSClassDeclaration): String? {
-        val namespaceAnnotation =
-            it.annotations.firstOrNull { annotation -> annotation.annotationType.resolve().declaration.qualifiedName?.asString() == InstallResourceManager::class.java.name }
-        val namespace = namespaceAnnotation?.arguments?.firstOrNull()?.value as? String
-        if (namespace?.isEmpty() == true) return null
-        return namespace
     }
 
     /**
@@ -128,6 +120,26 @@ internal class ResourceManagerAnnotationProcessor(
             e.printStackTrace()
             emptyList()
         }
+    }
+
+    private fun getModuleRootFile(pathToAnnotatedFile: File): File? {
+        var pathToSrcDirectory: File? = pathToAnnotatedFile
+
+        return try {
+            // Traverse the directory structure upwards until the "src" directory is found.
+            while (pathToSrcDirectory != null && pathToSrcDirectory.name != "src") {
+                pathToSrcDirectory = pathToSrcDirectory.parentFile
+            }
+            pathToSrcDirectory?.parentFile
+        } catch (e: Exception) {
+            // Print the stack trace and return null in case of any exception.
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun getProjectRootFile(pathToAnnotatedFile: File): File? {
+        return getModuleRootFile(pathToAnnotatedFile)?.parentFile
     }
 
     /**
