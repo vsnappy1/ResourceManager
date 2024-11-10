@@ -8,11 +8,11 @@ import java.time.format.DateTimeFormatter
  * Manages caching operations for the generated resource files to reduce redundant file generation
  * and support cache reuse when there are no relevant changes in observed files.
  *
- * @property buildDirectory The build directory where cache and generated files are located.
+ * @property moduleDirectory The module directory which has build directory where generated files are located.
  * @property filesUnderObservation A list of files whose last modified timestamps are observed for changes.
  */
 internal class CacheManager(
-    private val buildDirectory: File?,
+    private val moduleDirectory: File?,
     private val filesUnderObservation: List<File>
 ) {
 
@@ -22,12 +22,16 @@ internal class CacheManager(
         private const val LAST_MODIFIED_TIMESTAMP_FILE_NAME = "last_modified_timestamp.txt"
     }
 
+    private val buildDirectory: File by lazy {
+        File(moduleDirectory, "build")
+    }
+
     /**
      * Caches the content, path, and last modified timestamp of the generated ResourceManager file
      * if it exists in the KSP-generated directory.
      */
     fun cache() {
-        val moduleName = buildDirectory?.parentFile?.name ?: return
+        val moduleName = moduleDirectory?.name ?: return
 
         val kspDirectory = File(buildDirectory, "generated/ksp")
         if (!kspDirectory.exists()) return
@@ -39,7 +43,8 @@ internal class CacheManager(
         val cacheDirectory = File(buildDirectory, "$CACHE_DIRECTORY_PATH/$moduleName")
         cacheDirectory.mkdirs()
 
-        val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        val timestamp =
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         // Cache the content, file path, and last modified timestamp
         File(cacheDirectory, CONTENT_FILE_NAME)
             .writeText("${resourceManagerFile.readText()}// Cached on $timestamp")
@@ -54,8 +59,8 @@ internal class CacheManager(
      *
      * @return The cached content as a String, or null if the cache does not exist.
      */
-    fun getCachedContent() : String? {
-        val moduleName = buildDirectory?.parentFile?.name ?: return null
+    fun getCachedContent(): String? {
+        val moduleName = moduleDirectory?.name ?: return null
         val cacheDirectory = File(buildDirectory, "$CACHE_DIRECTORY_PATH/$moduleName")
 
         val contentFile = File(cacheDirectory, CONTENT_FILE_NAME)
@@ -69,7 +74,7 @@ internal class CacheManager(
      * Invalidates the cache by deleting the cached files for the module.
      */
     fun invalidateCache() {
-        val moduleName = buildDirectory?.parentFile?.name ?: return
+        val moduleName = moduleDirectory?.name ?: return
         val cacheDirectory = File(buildDirectory, "$CACHE_DIRECTORY_PATH/$moduleName")
 
         if (cacheDirectory.exists()) {
@@ -88,7 +93,7 @@ internal class CacheManager(
      * @return `true` if cache is up to date, `false` otherwise.
      */
     fun isCacheUpToDate(): Boolean {
-        val moduleName = buildDirectory?.parentFile?.name ?: return false
+        val moduleName = moduleDirectory?.name ?: return false
         val cacheDirectory = File(buildDirectory, "$CACHE_DIRECTORY_PATH/$moduleName")
 
         val lastModifiedTimestampFile = File(cacheDirectory, LAST_MODIFIED_TIMESTAMP_FILE_NAME)

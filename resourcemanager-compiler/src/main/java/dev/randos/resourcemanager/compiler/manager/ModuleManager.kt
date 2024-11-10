@@ -4,18 +4,33 @@ import org.w3c.dom.Document
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
+/**
+ * Manages module-related operations, including retrieving namespaces and module dependencies
+ * for an Android project module.
+ *
+ * @property moduleFile The root directory of the module.
+ */
 class ModuleManager(private val moduleFile: File) {
 
+
+    /**
+     * Retrieves the namespace of the module by checking both the build.gradle file and the AndroidManifest.xml.
+     * It prioritizes the namespace specified in the build.gradle file.
+     *
+     * @return The module's namespace if found, or `null` if not specified.
+     */
     fun getNamespace(): String? {
         return getNamespaceFromBuildGradle() ?: getNamespaceFromManifest()
     }
 
+    /**
+     * Retrieves a list of dependencies for this module from the build.gradle file,
+     * specifically those declared like `implementation project(':module-name')` or `implementation(project(":module-name"))`.
+     *
+     * @return A list of module dependencies as strings, or an empty list if no dependencies are found.
+     */
     fun getModuleDependencies(): List<String> {
-        // Find the appropriate build.gradle file (either .gradle or .gradle.kts)
-        var gradleFile = File(moduleFile, "build.gradle")
-        if (!gradleFile.exists()) {
-            gradleFile = File(moduleFile, "build.gradle.kts")
-        }
+        val gradleFile = getBuildGradleFile()
         if (!gradleFile.exists()) {
             return emptyList()
         }
@@ -57,6 +72,25 @@ class ModuleManager(private val moduleFile: File) {
         return dependencies
     }
 
+    /**
+     * Finds and returns the build.gradle file in the module directory, supporting both `.gradle` and `.gradle.kts` extensions.
+     *
+     * @return The build.gradle file if it exists, or a reference to a non-existent file if neither variant is present.
+     */
+    fun getBuildGradleFile(): File {
+        // Find the appropriate build.gradle file (either .gradle or .gradle.kts)
+        var gradleFile = File(moduleFile, "build.gradle")
+        if (!gradleFile.exists()) {
+            gradleFile = File(moduleFile, "build.gradle.kts")
+        }
+        return gradleFile
+    }
+
+    /**
+     * Extracts the namespace from the build.gradle file.
+     *
+     * @return The namespace as specified in the build.gradle file, or `null` if not found.
+     */
     private fun getNamespaceFromBuildGradle(): String? {
         // Find the appropriate build.gradle file (either .gradle or .gradle.kts)
         var gradleFile = File(moduleFile, "build.gradle")
@@ -101,6 +135,11 @@ class ModuleManager(private val moduleFile: File) {
         return null
     }
 
+    /**
+     * Retrieves the namespace from the AndroidManifest.xml.
+     *
+     * @return The package name as specified in AndroidManifest.xml, or `null` if the attribute is not found.
+     */
     private fun getNamespaceFromManifest(): String? {
         val manifestFile = File(moduleFile, "src/main/AndroidManifest.xml")
         if (!manifestFile.exists()) {

@@ -10,6 +10,7 @@ import dev.randos.resourcemanager.InstallResourceManager
 import dev.randos.resourcemanager.compiler.file.generation.ClassFileGenerator
 import dev.randos.resourcemanager.compiler.manager.CacheManager
 import dev.randos.resourcemanager.compiler.manager.ModuleManager
+import dev.randos.resourcemanager.compiler.model.ModuleDetails
 import dev.randos.resourcemanager.compiler.model.Resource
 import dev.randos.resourcemanager.compiler.model.ResourceType
 import java.io.File
@@ -20,6 +21,8 @@ internal class ResourceManagerAnnotationProcessor(
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
 
+    private val namespaceNotFoundExpectation =
+        IllegalStateException("Namespace could not be found in either build.gradle, build.gradle.kts or AndroidManifest.xml. Please ensure the module is properly configured.")
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("Processing annotations")
@@ -33,22 +36,22 @@ internal class ResourceManagerAnnotationProcessor(
         for (symbol in symbols) {
             val containingFile = symbol.containingFile ?: continue
             val annotatedFile = File(containingFile.filePath)
-            val resources = getResources(annotatedFile)
+            val moduleFile = getModuleRootFile(annotatedFile) ?: continue
+            val moduleManager = ModuleManager(moduleFile)
+            val resources = getResources(annotatedFile, moduleManager.getModuleDependencies())
             val packageName = symbol.packageName.asString()
-            val moduleFile = getModuleRootFile(annotatedFile)
-            val moduleManager = ModuleManager(moduleFile!!)
 
             try {
-                // Create the new file with a dependency on `containingFile`
+                // Create the new file with a dependency on all source files
                 val file = codeGenerator.createNewFile(
-                    dependencies = Dependencies(true, containingFile),
+                    dependencies = Dependencies.ALL_FILES,
                     packageName = packageName,
                     fileName = "ResourceManager"
                 )
 
                 val cacheManager = CacheManager(
-                    buildDirectory = annotatedFile.getPathToBuildDirectory(),
-                    filesUnderObservation = resources.getFilesUnderObservation()
+                    moduleDirectory = moduleFile,
+                    filesUnderObservation = resources.getFilesUnderObservation() + listOf(moduleManager.getBuildGradleFile()) // Also observe the module build.gradle file.
                 )
 
                 // Write the generated class content to the file
@@ -66,7 +69,8 @@ internal class ResourceManagerAnnotationProcessor(
 
                     if (classFile == null) {
                         classFile = ClassFileGenerator.generateClassFile(
-                            namespace = moduleManager.getNamespace() ?: throw IllegalStateException("Namespace could not be found in either build.gradle, build.gradle.kts or AndroidManifest.xml. Please ensure the module is properly configured."),
+                            namespace = moduleManager.getNamespace()
+                                ?: throw namespaceNotFoundExpectation,
                             files = resources
                         )
                     }
@@ -75,7 +79,10 @@ internal class ResourceManagerAnnotationProcessor(
                     out.close()
                 }
                 // Store the latest generated ResourceManager file in the cache for future use.
-                cacheManager.cache()
+                if(!cacheManager.isCacheUpToDate()){
+                    cacheManager.cache()
+                }
+
                 logger.info("Generated ResourceManager file for package $packageName.", symbol)
             } catch (e: Exception) {
                 logger.error(
@@ -95,31 +102,58 @@ internal class ResourceManagerAnnotationProcessor(
      * @param pathToAnnotatedFile A File object representing the path to the annotated file.
      * @return A list of [Resource].
      */
-    private fun getResources(pathToAnnotatedFile: File): List<Resource> {
-        var pathToMainDirectory = pathToAnnotatedFile
+    private fun getResources(
+        pathToAnnotatedFile: File,
+        moduleDependencies: List<String>
+    ): List<Resource> {
+        val pathToModuleDirectory = getModuleRootFile(pathToAnnotatedFile) ?: return emptyList()
         val list = mutableListOf<Resource>()
 
-        return try {
-            // Traverse the directory structure upwards until the "main" directory is found.
-            while (pathToMainDirectory.name != "main") {
-                pathToMainDirectory = pathToMainDirectory.parentFile
+        var resFile = File(pathToModuleDirectory, "src/main/res")
+
+        // Locate the "values" directory within the "res" directory.
+        list.add(
+            Resource(
+                type = ResourceType.VALUES,
+                moduleDetails = ModuleDetails(resDirectory = File(resFile, "values"))
+            )
+        )
+
+        // Locate the "drawable" directory within the "res" directory.
+        list.add(
+            Resource(
+                type = ResourceType.DRAWABLES,
+                moduleDetails = ModuleDetails(resDirectory = File(resFile, "drawable"))
+            )
+        )
+
+        /*
+         Also add resources for project dependencies. (i.e. implementation(project(":my_library")))
+         */
+        val projectFile = getProjectRootFile(pathToAnnotatedFile)
+        moduleDependencies.forEach { module ->
+            val moduleFile = File(projectFile, module)
+            resFile = File(moduleFile, "src/main/res")
+
+            ModuleManager(moduleFile).getNamespace()?.let { namespace ->
+                // Locate the "values" directory within the "res" directory.
+                list.add(
+                    Resource(
+                        type = ResourceType.VALUES,
+                        moduleDetails = ModuleDetails(module, namespace, File(resFile, "values"))
+                    )
+                )
+
+                // Locate the "drawable" directory within the "res" directory.
+                list.add(
+                    Resource(
+                        type = ResourceType.DRAWABLES,
+                        moduleDetails = ModuleDetails(module, namespace, File(resFile, "drawable"))
+                    )
+                )
             }
-
-            // Locate the "res" directory within the "main" directory.
-            val pathToResDirectory = File(pathToMainDirectory, "res")
-
-            // Locate the "values" directory within the "res" directory.
-            list.add(Resource(ResourceType.VALUES, File(pathToResDirectory, "values")))
-
-            // Locate the "drawable" directory within the "res" directory.
-            list.add(Resource(ResourceType.DRAWABLES, File(pathToResDirectory, "drawable")))
-
-            list
-        } catch (e: Exception) {
-            // Print the stack trace and return an empty map in case of any exception.
-            e.printStackTrace()
-            emptyList()
         }
+        return list
     }
 
     private fun getModuleRootFile(pathToAnnotatedFile: File): File? {
@@ -150,7 +184,7 @@ internal class ResourceManagerAnnotationProcessor(
      */
     private fun List<Resource>.getFilesUnderObservation(): List<File> {
         val files = mutableListOf<File>()
-        this.map { it.directoryPath }.forEach { directory ->
+        this.map { it.moduleDetails.resDirectory }.forEach { directory ->
             directory.walkTopDown().forEach { file ->
                 if (file.isFile) {
                     files.add(file)
@@ -158,20 +192,5 @@ internal class ResourceManagerAnnotationProcessor(
             }
         }
         return files
-    }
-
-    /**
-     * Determines the `build` directory path for a given source file.
-     *
-     * @receiver The `File` object representing a file in the project.
-     * @return The path to the `build` directory if found; `null` otherwise.
-     */
-    private fun File.getPathToBuildDirectory(): File? {
-        var file = this
-        while (file.name != "src") {
-            file = file.parentFile ?: return null
-        }
-        val buildDirectory = File(file.parentFile, "build")
-        return if (buildDirectory.exists()) buildDirectory else null
     }
 }
