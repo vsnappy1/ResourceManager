@@ -23,3 +23,4 @@ rootProject.name = "ResourceProvider"
 include(":app")
 include(":resourcemanager-compiler")
 include(":resourcemanager-runtime")
+include(":resourcemanager")
