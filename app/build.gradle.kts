@@ -3,7 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.google.devtools.ksp)
+    id("dev.randos.resourcemanager")
 }
 
 android {
@@ -73,9 +73,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation ("androidx.compose.runtime:runtime-livedata:1.7.4")
-
-    implementation(project(":resourcemanager-runtime"))
-    ksp(project(":resourcemanager-compiler"))
 
     testImplementation(libs.junit)
     

@@ -1,12 +1,15 @@
 plugins {
     `kotlin-dsl`
-    java
+    kotlin("jvm")
+    id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.3.0"
 }
+val agp: String by project
 
 dependencies {
     implementation(gradleApi())
     implementation(localGroovy())
+    compileOnly("com.android.tools.build:gradle:$agp")
 }
 
 group = "dev.randos"
@@ -27,12 +30,12 @@ gradlePlugin {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(11)
 }
 
 publishing {

@@ -98,7 +98,7 @@ class ModuleManager(private val moduleFile: File) {
             gradleFile = File(moduleFile, "build.gradle.kts")
         }
         if (!gradleFile.exists()) {
-            println("Error: Failed to find build.gradle/build.gradle.kts at path: ${gradleFile.absolutePath}")
+            println("Could not find build.gradle(.kts) at path: ${gradleFile.absolutePath}")
             return null
         }
 
@@ -131,7 +131,7 @@ class ModuleManager(private val moduleFile: File) {
             }
         }
 
-        println("Error: Failed to find namespace in gradle file at path: ${gradleFile.absolutePath}")
+        println("Could not find namespace in gradle file at path: ${gradleFile.absolutePath}")
         return null
     }
 
@@ -143,7 +143,7 @@ class ModuleManager(private val moduleFile: File) {
     private fun getNamespaceFromManifest(): String? {
         val manifestFile = File(moduleFile, "src/main/AndroidManifest.xml")
         if (!manifestFile.exists()) {
-            println("Error: Failed to find AndroidManifest.xml at path: ${manifestFile.absolutePath}")
+            println("Could not find AndroidManifest.xml at path: ${manifestFile.absolutePath}")
             return null
         }
 
@@ -161,7 +161,7 @@ class ModuleManager(private val moduleFile: File) {
             e.printStackTrace()
         }
 
-        println("Error: Failed to find attribute `package` in AndroidManifest.xml at path: ${manifestFile.absolutePath}")
+        println("Could not find attribute `package` in AndroidManifest.xml at path: ${manifestFile.absolutePath}")
         return null
     }
 }

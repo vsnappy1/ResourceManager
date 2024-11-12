@@ -16,10 +16,9 @@ internal class ResourceManagerGenerator(
     fun generate() {
 
         val moduleManager = ModuleManager(moduleFile)
-        val resources = getResources(moduleFile, moduleManager.getModuleDependencies())
 
         try {
-            // Create the new file with a dependency on all source files
+            // Ensure directory exists before writing to the file.
             generatedFile.parentFile.mkdirs()
 
             // Write the generated class content to the file
@@ -28,7 +27,7 @@ internal class ResourceManagerGenerator(
                 val classFile = ClassFileGenerator.generateClassFile(
                     namespace = moduleManager.getNamespace()
                         ?: throw IllegalStateException("Namespace could not be found in either build.gradle, build.gradle.kts or AndroidManifest.xml. Please ensure the module is properly configured."),
-                    files = resources
+                    files = getResources(moduleFile, moduleManager.getModuleDependencies())
                 )
 
                 out.write(classFile)
@@ -40,6 +39,10 @@ internal class ResourceManagerGenerator(
         }
     }
 
+    /**
+     * Returns resource files under observation such as strings.xml, dimens.xml, ic_gift.png etc,
+     * which are taken as input to generate ResourceManager (a generated class).
+     */
     fun getFilesUnderObservation(): List<File> {
         val moduleManager = ModuleManager(moduleFile)
         val resources = getResources(moduleFile, moduleManager.getModuleDependencies())
