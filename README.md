@@ -1,53 +1,39 @@
 # ResourceManager
-ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code. It supports both Kotlin and Java projects.
+ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.randos/resourcemanager-compiler.svg)](https://central.sonatype.com/artifact/dev.randos/resourcemanager-compiler)
 ![Platform Support](https://img.shields.io/badge/platform-Android-brightgreen.svg)
 
 ## Setup
 
-### Step 1: Set Up the KSP Plugin
-Add the KSP plugin to your project's (root) __build.gradle__.
+### Step 1: Set Up the ResourceManager Plugin (project)
+Add the resourcemanager plugin to your project's (root) __build.gradle__.
 ```kotlin
 plugins {
     id("com.android.application") version "8.0.1" apply false
     id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id("com.google.devtools.ksp") version "1.9.0-1.0.12"    // Add this line for KSP support
-}
-
-ext {
-    set("kspVersion", "1.9.0-1.0.12")    // Define kspVersion to be used by ResourceManager
+    id(dev.randos.resourcemanager") version "0.0.1" apply false    // Add this line for ResourceManager support
 }
 ```
-__Note:__ Ensure the KSP version matches your Kotlin version to avoid compatibility issues.
 
-### Step 2: Add Dependencies
-Add the ResourceManager dependencies in your module-level __build.gradle__.
+### Step 2: Set Up the ResourceManager Plugin (module)
+Add the ResourceManager plugin in your module-level __build.gradle__.
 ```kotlin
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     ...
-    id("com.google.devtools.ksp")  // Apply KSP
-}
-...
-dependencies {
-    ...
-    implementation("dev.randos:resourcemanager-runtime:0.0.4")    // Runtime dependency
-    ksp("dev.randos:resourcemanager-compiler:0.0.4")    // Compiler dependency for KSP
+    id("dev.randos.resourcemanager")  // Apply ResourceManager
 }
 ```
 
 ### Step 3: Initialize ResourceManager
 To enable ResourceManager, follow these steps:
 
-1. Annotate your `Application` class with `@InstallResourceManager`.
-2. Build the project to trigger KSP code generation.
-3. Initialize ResourceManager in the `onCreate` method of your `Application` class.
+1. Build the project to trigger code generation.
+2. Initialize ResourceManager in the `onCreate` method of your `Application` class.
 
 ```kotlin
-@InstallResourceManager    // Annotation to set up ResourceManager
 class MyApplication: Application() {
 
     override fun onCreate() {
