@@ -10,5 +10,5 @@ plugins {
 
 ext {
     set("kspVersion", libs.versions.kspVersion.get())
-    set("agp", libs.versions.agp.get())
+    set("agp", "7.0.0")
 }
