@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.randos.resourceprovider.ResourceManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -17,12 +16,7 @@ class HomeViewModel : ViewModel() {
     fun getData() {
         viewModelScope.launch {
             delay(1000)
-            try {
-                _uiState.postValue(HomeScreenState(text = ResourceManager.Strings.test()))
-
-            } catch (e: Exception) {
-                _uiState.postValue(HomeScreenState(text = e.localizedMessage?:"---"))
-            }
+            _uiState.postValue(HomeScreenState(text = "---"))
             Log.d("TAG", "getData: ")
         }
     }
