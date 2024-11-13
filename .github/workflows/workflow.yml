@@ -45,29 +45,21 @@ jobs:
         uses: android-actions/setup-android@v2.0.10
 
       - name: Run Tests
-        run: ./gradlew test
+        run: ./gradlew :resourcemanager:test
 
       - name: Generate Artifacts
-        run: ./gradlew :resourcemanager-compiler:generateArtifacts :resourcemanager-runtime:generateArtifacts --parallel
+        run: ./gradlew :resourcemanager:generateArtifacts
 
       - name: Generate CheckSum
-        run: ./gradlew :resourcemanager-compiler:generateChecksum :resourcemanager-runtime:generateChecksum --parallel
+        run: ./gradlew :resourcemanager:generateChecksum
 
       - name: Sign Artifacts
-        run: ./gradlew :resourcemanager-compiler:signArtifacts :resourcemanager-runtime:signArtifacts --parallel
+        run: ./gradlew :resourcemanager:signArtifacts
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
-      - name: Create bundle
-        run: ./gradlew :resourcemanager-compiler:generateBundle :resourcemanager-runtime:generateBundle --parallel
 
       - name: Upload bundle
         uses: actions/upload-artifact@v4.4.3
         with:
-          name: resourcemanager-compiler
-          path: resourcemanager-compiler/build/artifacts
-
-      - uses: actions/upload-artifact@v4.4.3
-        with:
-          name: resourcemanager-runtime
-          path: resourcemanager-runtime/build/artifacts
+          name: resourcemanager
+          path: resourcemanager/build/artifacts

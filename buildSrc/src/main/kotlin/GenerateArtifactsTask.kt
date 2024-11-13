@@ -22,11 +22,16 @@ import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 abstract class GenerateArtifactsTask : DefaultTask() {
 
     /**
-     * The name of the artifact, including its version, used to label
-     * generated files consistently.
+     * The name of the artifact, used to label generated files consistently.
      */
     @get:Input
-    lateinit var artifactNameWithVersion: String
+    lateinit var artifactName: String
+
+    /**
+     * The version of the artifact, used to label generated files consistently.
+     */
+    @get:Input
+    lateinit var artifactVersion: String
 
     /**
      * The directory where all generated artifacts will be saved.
@@ -64,7 +69,7 @@ abstract class GenerateArtifactsTask : DefaultTask() {
         project.tasks.create("generateBaseJar", Jar::class.java) {
             group = "build"
             description = "Generates a base JAR file containing compiled classes."
-            archiveBaseName.set(artifactNameWithVersion)
+            archiveBaseName.set(artifactName)
             destinationDirectory.set(outputDirectory)
             from(project.tasks.getByName("classes").outputs.files)
             dependsOn(":resourcemanager-compiler:build")
@@ -78,7 +83,7 @@ abstract class GenerateArtifactsTask : DefaultTask() {
         project.tasks.create("generateJavadocJar", Jar::class.java) {
             group = "build"
             description = "Generates a JAR file containing Javadoc."
-            archiveBaseName.set(artifactNameWithVersion)
+            archiveBaseName.set(artifactName)
             archiveClassifier.set("javadoc")
             destinationDirectory.set(outputDirectory)
             from(project.tasks.getByName("javadoc").outputs.files)
@@ -94,7 +99,7 @@ abstract class GenerateArtifactsTask : DefaultTask() {
         project.tasks.create("generateSourcesJar", Jar::class.java) {
             group = "build"
             description = "Generates a JAR file containing source files."
-            archiveBaseName.set(artifactNameWithVersion)
+            archiveBaseName.set(artifactName)
             archiveClassifier.set("sources")
             destinationDirectory.set(outputDirectory)
             from(extensions.sourceSets.getByName("main").allSource)
@@ -110,7 +115,7 @@ abstract class GenerateArtifactsTask : DefaultTask() {
         project.tasks.create("generatePom", GenerateMavenPom::class.java) {
             group = "build"
             description = "Generates the POM XML file for the Maven publication."
-            destination = File(outputDirectory, "$artifactNameWithVersion.pom")
+            destination = File(outputDirectory, "${artifactName}-${artifactVersion}.pom")
             pom = this@GenerateArtifactsTask.pom
         }.also { it.actions.forEach { action -> action.execute(it) } }
     }
