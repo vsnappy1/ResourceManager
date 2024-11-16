@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="countries">
-        <item>India ES</item>
-        <item>USA ES</item>
-        <item>UK ES</item>
-        <item>Canada ES</item>
-    </string-array>
-</resources>

@@ -21,5 +21,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ResourceProvider"
-include(":app")
 include(":resourcemanager")

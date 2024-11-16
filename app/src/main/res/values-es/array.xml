@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <array name="rainbow">
-        <item>#FF6200EE-ES</item>
-        <item>#FF3700B3-ES</item>
-        <item>#FF03DAC5-ES</item>
-        <item>#FF018786-ES</item>
-    </array>
-</resources>
