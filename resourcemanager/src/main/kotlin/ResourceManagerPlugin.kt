@@ -1,8 +1,10 @@
 import com.android.build.gradle.BaseExtension
 import dev.randos.resourcemanager.ResourceManagerGenerator
 import dev.randos.resourcemanager.manager.ModuleManager
+import dev.randos.resourcemanager.manager.ResourceManager
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import task.ResourceManagerMigrationTask
 import java.io.File
 
 /**
@@ -16,11 +18,12 @@ class ResourceManagerPlugin : Plugin<Project> {
 
         // Define the location of the generated Kotlin file containing resource management code.
         val mainDirectory = File(project.projectDir, "build/generated/source/resourcemanager/main")
-        val namespacePath = ModuleManager(project.projectDir).getNamespace()?.replace(".","/")
+        val namespacePath = ModuleManager(project.projectDir).getNamespace()?.replace(".", "/")
         val generatedFile = File(mainDirectory, "$namespacePath/ResourceManager.kt")
 
         // Initialize the ResourceManagerGenerator responsible for generating the Kotlin code.
-        val resourceManager = ResourceManagerGenerator(project.projectDir, generatedFile)
+        val resourceManagerGenerator = ResourceManagerGenerator(project.projectDir, generatedFile)
+        val resourceManager = ResourceManager(project.projectDir)
 
         // Register a new Gradle task to generate the ResourceManager code.
         val generateResourceManagerTask = project.tasks.register("generateResourceManager") {
@@ -31,7 +34,7 @@ class ResourceManagerPlugin : Plugin<Project> {
             inputs.files(resourceManager.getFilesUnderObservation())
             outputs.files(generatedFile)
             doLast {
-                resourceManager.generate()
+                resourceManagerGenerator.generate()
             }
         }
 
@@ -47,5 +50,10 @@ class ResourceManagerPlugin : Plugin<Project> {
             .getByName("main")
             .kotlin
             .srcDir(mainDirectory)
+
+        /********************************** Migration **********************************/
+        project.tasks.register("migrateToResourceManager", ResourceManagerMigrationTask::class.java){
+            dependsOn(generateResourceManagerTask)
+        }
     }
 }

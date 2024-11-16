@@ -35,31 +35,14 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      - id: install-secret-key
-        name: Install gpg secret key
-        run: |
-          # Install gpg secret key
-          cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2.0.10
+
+      - name: Run Lint Check
+        run: ./gradlew :resourcemanager:lint
 
       - name: Run Tests
         run: ./gradlew :resourcemanager:test
 
-      - name: Generate Artifacts
-        run: ./gradlew :resourcemanager:generateArtifacts
-
-      - name: Generate CheckSum
-        run: ./gradlew :resourcemanager:generateChecksum
-
-      - name: Sign Artifacts
-        run: ./gradlew :resourcemanager:signArtifacts
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
-      - name: Upload bundle
-        uses: actions/upload-artifact@v4.4.3
-        with:
-          name: resourcemanager
-          path: resourcemanager/build/artifacts
+      - name: Publish to Gradle Plugin Portal
+        run: ./gradlew publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_PUBLISH_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_PUBLISH_SECRET }}

@@ -9,7 +9,7 @@ plugins {
 }
 val agp: String by project
 val pluginGroup = "dev.randos"
-val pluginVersion = "0.0.1"
+val pluginVersion = "0.0.2"
 val pluginName = "resourcemanager"
 
 dependencies {

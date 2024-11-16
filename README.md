@@ -12,7 +12,7 @@ plugins {
     id("com.android.application") version "8.0.1" apply false
     id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id(dev.randos.resourcemanager") version "0.0.1" apply false    // Add this line for ResourceManager support
+    id(dev.randos.resourcemanager") version "0.0.2" apply false    // Add this line for ResourceManager support
 }
 ```
 
@@ -57,3 +57,26 @@ class MyViewModel : ViewModel() {
     }
 }
 ```
+
+## Migration
+To streamline the transition to ResourceManager, plugin comes with a Gradle task to automate key aspects of the migration process. Please follow these steps carefully.
+
+#### Important Warning ⚠️
+
+Before starting the migration process, it is highly recommend to:
+1.	__Use Version Control:__ Ensure your project is tracked with a version control system like Git.
+2.	__Create a Backup:__ Either create a new branch or make a copy of your project to prevent unintended changes or data loss during migration.
+
+#### Running the Migration Task
+
+To perform the migration, execute the following Gradle command:
+
+```bash
+./gradlew migrateToResourceManager -PconfirmMigration=true
+```
+__Note:*__ The `-PconfirmMigration=true` parameter confirms that you understand the potential impacts of the migration and agree to proceed.
+
+#### Post-Migration Checklist
+1. Review the generated migration report, located at *.../build/reports/migration/resourcemanager-migration-report.html*.
+2. Verify your project builds successfully without warnings or errors.
+3. Ensure that all resources are correctly migrated and that the application behaves as expected.
