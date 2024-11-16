@@ -10,7 +10,6 @@ import dev.randos.resourcemanager.utils.toCamelCase
 import java.io.File
 
 internal class ClassFileGenerator {
-
     companion object {
         fun generateClassFile(
             namespace: String,
@@ -21,7 +20,7 @@ internal class ClassFileGenerator {
                 appendLine("import android.app.Application")
                 appendLine("import android.graphics.drawable.Drawable")
                 appendLine("import android.content.res.Resources.Theme")
-                appendLine("import ${namespace}.R\n")
+                appendLine("import $namespace.R\n")
                 appendLine("object ResourceManager {\n")
                 appendLine("\tprivate var _application: Application? = null")
                 appendLine("\tprivate val application: Application")
@@ -79,10 +78,7 @@ internal class ClassFileGenerator {
             }
 
             map.forEach {
-                val resourceObject = generateObject(
-                    "${it.key}s",
-                    it.value
-                )
+                val resourceObject = generateObject("${it.key}s", it.value)
                 appendLine(resourceObject)
             }
         }
@@ -96,59 +92,68 @@ internal class ClassFileGenerator {
                 appendLine("\tobject $name {")
                 pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                     when (resource.type) {
-                        ValueResourceType.Array, ValueResourceType.StringArray -> appendStringArrayResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Array, ValueResourceType.StringArray ->
+                            appendStringArrayResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.Boolean -> appendBooleanResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Boolean ->
+                            appendBooleanResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.Color -> appendColorResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Color ->
+                            appendColorResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.Dimension -> appendDimensionResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Dimension ->
+                            appendDimensionResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.Fraction -> appendFractionResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Fraction ->
+                            appendFractionResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.IntArray -> appendIntArrayResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.IntArray ->
+                            appendIntArrayResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.Integer -> appendIntegerResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Integer ->
+                            appendIntegerResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        ValueResourceType.Plural -> appendPluralResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        ValueResourceType.Plural ->
+                            appendPluralResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
 
-                        is ValueResourceType.String -> appendStringResource(
-                            resource = resource,
-                            defaultIndentation = defaultIndentation,
-                            moduleDetails = moduleDetails
-                        )
+                        is ValueResourceType.String ->
+                            appendStringResource(
+                                resource = resource,
+                                defaultIndentation = defaultIndentation,
+                                moduleDetails = moduleDetails
+                            )
                     }
                 }
                 appendLine("\t}")
@@ -162,7 +167,9 @@ internal class ClassFileGenerator {
         ) {
             val namespaceString = getNamespace(moduleDetails)
             val moduleNameString = getModuleNameString(moduleDetails)
-            appendLine("${defaultIndentation}@JvmOverloads @JvmStatic fun ${name.toCamelCase()}${moduleNameString}(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.${name}, theme)")
+            appendLine(
+                "$defaultIndentation@JvmOverloads @JvmStatic fun ${name.toCamelCase()}$moduleNameString(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
+            )
         }
 
         private fun StringBuilder.appendDimensionResource(
@@ -171,7 +178,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}() : Float = application.resources.getDimension(${namespaceString}R.dimen.${resource.name})")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName() : Float = application.resources.getDimension(${namespaceString}R.dimen.${resource.name})"
+            )
         }
 
         private fun StringBuilder.appendColorResource(
@@ -180,7 +190,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmOverloads @JvmStatic fun ${getMethodName(resource, moduleDetails)}(theme: Theme = application.theme) : Int = application.resources.getColor(${namespaceString}R.color.${resource.name}, theme)")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(theme: Theme = application.theme) : Int = application.resources.getColor(${namespaceString}R.color.${resource.name}, theme)"
+            )
         }
 
         private fun StringBuilder.appendIntegerResource(
@@ -189,7 +202,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}() : Int = application.resources.getInteger(${namespaceString}R.integer.${resource.name})")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName() : Int = application.resources.getInteger(${namespaceString}R.integer.${resource.name})"
+            )
         }
 
         private fun StringBuilder.appendBooleanResource(
@@ -198,7 +214,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}() : Boolean = application.resources.getBoolean(${namespaceString}R.bool.${resource.name})")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName() : Boolean = application.resources.getBoolean(${namespaceString}R.bool.${resource.name})"
+            )
         }
 
         private fun StringBuilder.appendFractionResource(
@@ -207,7 +226,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(${namespaceString}R.fraction.${resource.name}, base, pbase)")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(${namespaceString}R.fraction.${resource.name}, base, pbase)"
+            )
         }
 
         private fun StringBuilder.appendStringResource(
@@ -216,10 +238,15 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
+            val methodName = getMethodName(resource, moduleDetails)
             if (resource.type is ValueResourceType.String && resource.type.isParameterized) {
-                appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}(vararg args: Any = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)")
+                appendLine(
+                    "$defaultIndentation@JvmStatic fun $methodName(vararg args: Any = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
+                )
             } else {
-                appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}() : String = application.resources.getString(${namespaceString}R.string.${resource.name})")
+                appendLine(
+                    "$defaultIndentation@JvmStatic fun $methodName() : String = application.resources.getString(${namespaceString}R.string.${resource.name})"
+                )
             }
         }
 
@@ -229,7 +256,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(${namespaceString}R.plurals.${resource.name}, quantity, args)")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(${namespaceString}R.plurals.${resource.name}, quantity, args)"
+            )
         }
 
         private fun StringBuilder.appendStringArrayResource(
@@ -238,7 +268,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}() : kotlin.Array<String> = application.resources.getStringArray(${namespaceString}R.array.${resource.name})")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName() : kotlin.Array<String> = application.resources.getStringArray(${namespaceString}R.array.${resource.name})"
+            )
         }
 
         private fun StringBuilder.appendIntArrayResource(
@@ -247,7 +280,10 @@ internal class ClassFileGenerator {
             moduleDetails: ModuleDetails
         ) {
             val namespaceString = getNamespace(moduleDetails)
-            appendLine("${defaultIndentation}@JvmStatic fun ${getMethodName(resource, moduleDetails)}() : IntArray = application.resources.getIntArray(${namespaceString}R.array.${resource.name})")
+            val methodName = getMethodName(resource, moduleDetails)
+            appendLine(
+                "$defaultIndentation@JvmStatic fun $methodName() : IntArray = application.resources.getIntArray(${namespaceString}R.array.${resource.name})"
+            )
         }
 
         /**
@@ -256,9 +292,12 @@ internal class ClassFileGenerator {
          *
          * @return A string representing the generated method name in camel case format.
          */
-        private fun getMethodName(resource: ValueResource, moduleDetails: ModuleDetails): String {
+        private fun getMethodName(
+            resource: ValueResource,
+            moduleDetails: ModuleDetails
+        ): String {
             val moduleNameString = getModuleNameString(moduleDetails)
-            return "${resource.name.toCamelCase()}${moduleNameString}"
+            return "${resource.name.toCamelCase()}$moduleNameString"
         }
 
         /**

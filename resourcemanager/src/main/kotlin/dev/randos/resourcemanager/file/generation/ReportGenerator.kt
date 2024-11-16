@@ -10,7 +10,6 @@ import java.time.format.DateTimeFormatter
  * original code, and updated code.
  */
 internal object ReportGenerator {
-
     /**
      * Generates an HTML report summarizing the migration of source files.
      *
@@ -18,102 +17,104 @@ internal object ReportGenerator {
      * @return A String containing the complete HTML content of the report.
      */
     fun generateMigrationReport(files: List<SourceFileDetails>): String {
-        return """
-        <!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Migration Report</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 20px;
-                    }
-        
-                    h1 {
-                        color: #333;
-                    }
-        
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-bottom: 20px;
-                    }
-        
-                    th,
-                    td {
-                        padding: 10px;
-                        border: 1px solid #ccc;
-                    }
-        
-                    th {
-                        background-color: #f2f2f2;
-                        text-align: left;
-                    }
-        
-                    tr:nth-child(even) {
-                        background-color: #f9f9f9;
-                    }
-        
-                    .file-section {
-                        margin-top: 20px;
-                    }
-        
-                    .change-header {
-                        font-weight: bold;
-                        color: #555;
-                        margin-top: 10px;
-                    }
-        
-                    .line-number {
-                        font-style: italic;
-                        color: #888;
-                    }
-        
-                    .current {
-                        color: #d9534f;
-                    }
-        
-                    .updated {
-                        color: #5cb85c;
-                    }
-                </style>
-            </head>
-            <body>
-                <h1>Resource Manager Migration Report</h1>
-                <p>Generated on ${getFormattedDate()}</p> ${
-            files.joinToString(separator = "") { file ->
-                """ 
-                <div class="file-section">
-                <h2>File: ${file.name}</h2>
-                <p>
-                    <strong>Path:</strong> ${file.path}
-                </p>
-                <table>
-                    <tr>
-                        <th style="width: 10%;">Line Number</th>
-                        <th style="width: 55%;">Original Code</th>
-                        <th style="width: 35%;">Updated Code</th>
-                    </tr> ${
-                    file.changes.joinToString(separator = "") { change ->
-                    """ 
-                    <tr>
-                        <td class="line-number">${change.lineNumber}</td>
-                        <td class="current">${change.current.escapeHtml()}</td>
-                        <td class="updated">${change.updated.escapeHtml()}</td>
-                    </tr> 
-                    """
-                    }
-                }
-                    </table>
-                </div> 
+        val report = StringBuilder()
+        report.apply {
+            appendLine("<!DOCTYPE html>")
+            appendLine("<html lang=\"en\">")
+            appendLine("<head>")
+            appendLine("<meta charset=\"UTF-8\">")
+            appendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
+            appendLine("<title>Migration Report</title>")
+            appendLine("<style>")
+            appendLine(
                 """
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                }
+                
+                h1 {
+                    color: #333;
+                }
+                
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                
+                th, td {
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                }
+                
+                th {
+                    background-color: #f2f2f2;
+                    text-align: left;
+                }
+                
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                
+                .file-section {
+                    margin-top: 20px;
+                }
+                
+                .change-header {
+                    font-weight: bold;
+                    color: #555;
+                    margin-top: 10px;
+                }
+                
+                .line-number {
+                    font-style: italic;
+                    color: #888;
+                }
+                
+                .current {
+                    color: #d9534f;
+                }
+                
+                .updated {
+                    color: #5cb85c;
+                }
+                """.trimIndent()
+            )
+            appendLine("</style>")
+            appendLine("</head>")
+            appendLine("<body>")
+            appendLine("<h1>Resource Manager Migration Report</h1>")
+            appendLine("<p>Generated on ${getFormattedDate()}</p>")
+
+            for (file in files) {
+                appendLine("<div class=\"file-section\">")
+                appendLine("<h2>File: ${file.name}</h2>")
+                appendLine("<p><strong>Path:</strong> ${file.path}</p>")
+                appendLine("<table>")
+                appendLine("<tr>")
+                appendLine("<th style=\"width: 10%;\">Line Number</th>")
+                appendLine("<th style=\"width: 55%;\">Original Code</th>")
+                appendLine("<th style=\"width: 35%;\">Updated Code</th>")
+                appendLine("</tr>")
+
+                for (change in file.changes) {
+                    appendLine("<tr>")
+                    appendLine("<td class=\"line-number\">${change.lineNumber}</td>")
+                    appendLine("<td class=\"current\">${change.current.escapeHtml()}</td>")
+                    appendLine("<td class=\"updated\">${change.updated.escapeHtml()}</td>")
+                    appendLine("</tr>")
+                }
+
+                appendLine("</table>")
+                appendLine("</div>")
             }
+
+            appendLine("</body>")
+            appendLine("</html>")
         }
-            </body>
-        </html>
-        """.trimIndent()
+
+        return report.toString()
     }
 
     /**

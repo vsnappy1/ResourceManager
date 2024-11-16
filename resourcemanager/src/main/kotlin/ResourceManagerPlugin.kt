@@ -15,7 +15,6 @@ import java.io.File
  */
 class ResourceManagerPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-
         // Define the location of the generated Kotlin file containing resource management code.
         val mainDirectory = File(project.projectDir, "build/generated/source/resourcemanager/main")
         val namespacePath = ModuleManager(project.projectDir).getNamespace()?.replace(".", "/")
@@ -26,17 +25,17 @@ class ResourceManagerPlugin : Plugin<Project> {
         val resourceManager = ResourceManager(project.projectDir)
 
         // Register a new Gradle task to generate the ResourceManager code.
-        val generateResourceManagerTask = project.tasks.register("generateResourceManager") {
-
-            // Define the input and output files for the task. This ensures that the task is only executed
-            // when there is a change in any of the input files or the output file, optimizing the build process
-            // by avoiding unnecessary task executions.
-            inputs.files(resourceManager.getFilesUnderObservation())
-            outputs.files(generatedFile)
-            doLast {
-                resourceManagerGenerator.generate()
+        val generateResourceManagerTask =
+            project.tasks.register("generateResourceManager") {
+                // Define the input and output files for the task. This ensures that the task is only executed
+                // when there is a change in any of the input files or the output file, optimizing the build process
+                // by avoiding unnecessary task executions.
+                inputs.files(resourceManager.getFilesUnderObservation())
+                outputs.files(generatedFile)
+                doLast {
+                    resourceManagerGenerator.generate()
+                }
             }
-        }
 
         // Ensure that the "generateResourceManager" task runs before any compile task.
         project.tasks.matching { it.name.startsWith("compile") }
@@ -52,7 +51,10 @@ class ResourceManagerPlugin : Plugin<Project> {
             .srcDir(mainDirectory)
 
         /********************************** Migration **********************************/
-        project.tasks.register("migrateToResourceManager", ResourceManagerMigrationTask::class.java){
+        project.tasks.register(
+            "migrateToResourceManager",
+            ResourceManagerMigrationTask::class.java
+        ) {
             dependsOn(generateResourceManagerTask)
         }
     }

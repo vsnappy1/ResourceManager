@@ -9,5 +9,5 @@ package dev.randos.resourcemanager.model
  */
 internal data class ValueResource(
     val name: String,
-    val type: ValueResourceType,
+    val type: ValueResourceType
 )

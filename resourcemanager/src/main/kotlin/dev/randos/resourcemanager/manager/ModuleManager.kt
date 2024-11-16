@@ -11,8 +11,6 @@ import javax.xml.parsers.DocumentBuilderFactory
  * @property moduleFile The root directory of the module.
  */
 class ModuleManager(private val moduleFile: File) {
-
-
     /**
      * Retrieves the namespace of the module by checking both the build.gradle file and the AndroidManifest.xml.
      * It prioritizes the namespace specified in the build.gradle file.
@@ -38,10 +36,17 @@ class ModuleManager(private val moduleFile: File) {
         val dependencies = mutableListOf<String>()
 
         // Define regex patterns for the two styles of module dependencies
-        val dependencyPatterns = listOf(
-            Regex("\\s*implementation\\s*\\(\\s*project\\s*\\(\\s*['\"]\\s*:\\s*(.+)\\s*['\"]\\s*\\)\\s*\\)"),  // Matches: implementation(project(":module-name"))
-            Regex("\\s*implementation\\s* \\s*project\\s*\\(\\s*['\"]\\s*:\\s*(.+)\\s*['\"]\\s*\\)"),           // Matches: implementation project(':module-name')
-        )
+        val dependencyPatterns =
+            listOf(
+                // Matches: implementation(project(":module-name"))
+                Regex(
+                    "\\s*implementation\\s*\\(\\s*project\\s*\\(\\s*['\"]\\s*:\\s*(.+)\\s*['\"]\\s*\\)\\s*\\)"
+                ),
+                // Matches: implementation project(':module-name')
+                Regex(
+                    "\\s*implementation\\s* \\s*project\\s*\\(\\s*['\"]\\s*:\\s*(.+)\\s*['\"]\\s*\\)"
+                )
+            )
 
         var isBlockComment = false
         val lines = gradleFile.readLines().filter { it.isNotBlank() }
@@ -104,7 +109,7 @@ class ModuleManager(private val moduleFile: File) {
 
         // Define regex pattern for the style of namespace
         val namespacePattern =
-            Regex("\\s*namespace\\s*=\\s*[\"'](.+)[\"']")   // Matches: namespace = "com.example.app"
+            Regex("\\s*namespace\\s*=\\s*[\"'](.+)[\"']") // Matches: namespace = "com.example.app"
 
         var isBlockComment = false
         val lines = gradleFile.readLines().filter { it.isNotBlank() }

@@ -7,9 +7,7 @@ import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
 internal class XmlParser {
-
     companion object {
-
         private const val STRING_TAG = "string"
         private const val COLOR_TAG = "color"
         private const val BOOLEAN_TAG = "bool"

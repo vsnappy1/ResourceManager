@@ -1,0 +1,6 @@
+[*.{kt,kts}]
+insert_final_newline = false
+ij_c_function_parameters_new_line_after_lpar = false
+max_line_length = off
+ij_kotlin_allow_trailing_comma = false
+ij_kotlin_allow_trailing_comma_on_call_site = false

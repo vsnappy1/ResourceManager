@@ -1,9 +1,12 @@
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+
 plugins {
     `kotlin-dsl`
     kotlin("jvm")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.3.0"
     id("maven-publish")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 val agp: String by project
 val pluginGroup = "dev.randos"
@@ -40,6 +43,12 @@ java {
 
 kotlin {
     jvmToolchain(8)
+}
+
+ktlint {
+    reporters {
+        reporter(ReporterType.HTML)
+    }
 }
 
 publishing {

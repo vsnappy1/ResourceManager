@@ -6,14 +6,13 @@ import dev.randos.resourcemanager.manager.ModuleManager
 import dev.randos.resourcemanager.manager.ResourceManager
 import dev.randos.resourcemanager.model.Change
 import dev.randos.resourcemanager.model.SourceFileDetails
+import dev.randos.resourcemanager.utils.toCamelCase
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
-import dev.randos.resourcemanager.utils.toCamelCase
 import java.io.File
 
 abstract class ResourceManagerMigrationTask : DefaultTask() {
-
     /**
      * A common regex pattern used to match optional method or property chains preceding a resource call.
      *
@@ -52,7 +51,7 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
             getOneParamRegex("getDrawable", "drawable") to "ResourceManager.Drawables.",
             getOneParamRegex("getQuantityString", "plurals") to "ResourceManager.Plurals.",
             getOneParamRegex("getString", "string") to "ResourceManager.Strings.",
-            getTwoParamRegex("getFraction", "fraction") to "ResourceManager.Fractions.",
+            getTwoParamRegex("getFraction", "fraction") to "ResourceManager.Fractions."
         )
     }
 
@@ -62,7 +61,10 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
      * Example match:
      * - `getString(R.string.app_name)`
      */
-    private fun getZeroParamRegex(methodName: String, resourceType: String): Regex {
+    private fun getZeroParamRegex(
+        methodName: String,
+        resourceType: String
+    ): Regex {
         return Regex("${common}${methodName}\\(\\s*(.+)*R\\.${resourceType}\\.(\\w+)\\s*\\)")
     }
 
@@ -72,7 +74,10 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
      * Example match:
      * - `getString(R.string.app_name, someValue)`
      */
-    private fun getOneParamRegex(methodName: String, resourceType: String): Regex {
+    private fun getOneParamRegex(
+        methodName: String,
+        resourceType: String
+    ): Regex {
         return Regex("${common}${methodName}\\(\\s*(.+)*R\\.${resourceType}\\.(\\w+),\\s*(.+)\\s*\\)")
     }
 
@@ -82,13 +87,15 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
      * Example match:
      * - `getFraction(R.fraction.some_fraction, param1, param2)`
      */
-    private fun getTwoParamRegex(methodName: String, resourceType: String): Regex {
+    private fun getTwoParamRegex(
+        methodName: String,
+        resourceType: String
+    ): Regex {
         return Regex("${common}${methodName}\\(\\s*(.+)*R\\.${resourceType}\\.(\\w+),\\s*(.+)\\s*,\\s*(.+)\\s*\\)")
     }
 
     @TaskAction
     fun run() {
-
         // Check for confirmation flag
         if (!(project.hasProperty("confirmMigration") && project.findProperty("confirmMigration") == "true")) {
             println("Warning: This task will modify project files.")
@@ -129,7 +136,7 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
                 if (matchResultImport?.groups?.size == 2) {
                     val semiColan = if (sourceFile.extension == "java") ";" else ""
                     val currentImportStatement = matchResultImport.groups[0]?.value.orEmpty()
-                    val newImportStatement = "import ${namespace}.ResourceManager$semiColan"
+                    val newImportStatement = "import $namespace.ResourceManager$semiColan"
 
                     val newLine =
                         line.replace(currentImportStatement, newImportStatement)
@@ -151,9 +158,9 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
                     if (matchResultResource == null) continue
 
                     val moduleNamespace =
-                        matchResultResource.groups[1]?.value.orEmpty()    // 'com.example.mylibrary1.' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
+                        matchResultResource.groups[1]?.value.orEmpty() // 'com.example.mylibrary1.' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
                     val resourceId =
-                        matchResultResource.groups[2]?.value.orEmpty()     // 'fun_title' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
+                        matchResultResource.groups[2]?.value.orEmpty() // 'fun_title' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
 
                     // If we don't have this resourceId in our set, simply skip this.
                     if (!resourceIds.contains(resourceId)) {
@@ -181,7 +188,7 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
                         // Group size will be 3 when there is no params passed to resource access code.
                         3 -> {
                             val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode = "${resourcemanagerStatement}${suffix}()"
+                            val newResourceAccessCode = "${resourcemanagerStatement}$suffix()"
 
                             val newLine =
                                 line.replace(currentResourceAccessCode, newResourceAccessCode)
@@ -198,7 +205,7 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
                             val param = matchResultResource.groups[3]?.value.orEmpty()
                             val currentResourceAccessCode = matchResultResource.value
                             val newResourceAccessCode =
-                                "${resourcemanagerStatement}${suffix}($param)"
+                                "${resourcemanagerStatement}$suffix($param)"
 
                             val newLine =
                                 line.replace(currentResourceAccessCode, newResourceAccessCode)
@@ -216,7 +223,7 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
                             val param2 = matchResultResource.groups[4]?.value.orEmpty()
                             val currentResourceAccessCode = matchResultResource.value
                             val newResourceAccessCode =
-                                "${resourcemanagerStatement}${suffix}($param1, $param2)"
+                                "${resourcemanagerStatement}$suffix($param1, $param2)"
 
                             val newLine =
                                 line.replace(currentResourceAccessCode, newResourceAccessCode)
@@ -251,7 +258,9 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
             }
         }
 
-        println("\nModified ${updatedSourceFiles.count()} file(s) with a total of ${updatedSourceFiles.flatMap { it.changes }.size} changes applied.")
+        println(
+            "\nModified ${updatedSourceFiles.count()} file(s) with a total of ${updatedSourceFiles.flatMap { it.changes }.size} changes applied."
+        )
         generateMigrationReport(updatedSourceFiles)
         println("\n***************** MIGRATION END *****************\n")
     }
@@ -335,10 +344,11 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
      * @param files A list of source file details used to generate the migration report.
      */
     private fun generateMigrationReport(files: List<SourceFileDetails>) {
-        val report = File(
-            project.projectDir,
-            "build/reports/migration/resourcemanager-migration-report.html"
-        )
+        val report =
+            File(
+                project.projectDir,
+                "build/reports/migration/resourcemanager-migration-report.html"
+            )
         report.parentFile.mkdirs()
 
         val htmlContent = ReportGenerator.generateMigrationReport(files)
@@ -349,7 +359,10 @@ abstract class ResourceManagerMigrationTask : DefaultTask() {
     /**
      * Logs the updated line in a source file.
      */
-    private fun logUpdatedLine(sourceFile: File, lineNumber: Int){
+    private fun logUpdatedLine(
+        sourceFile: File,
+        lineNumber: Int
+    ) {
         println("Updated: ${sourceFile.absolutePath}:$lineNumber:")
     }
 }
