@@ -1,8 +1,12 @@
 [versions]
 jetbrainsKotlinJvm = "1.9.0"
 ktlint = "12.1.1"
+junit = "4.12"
+mockk = "1.13.13"
 
 [libraries]
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockk = {group = "io.mockk", name = "mockk", version.ref = "mockk"}
 
 [plugins]
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }

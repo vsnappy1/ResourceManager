@@ -17,6 +17,8 @@ dependencies {
     implementation(gradleApi())
     implementation(localGroovy())
     compileOnly("com.android.tools.build:gradle:$agp")
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
 }
 
 group = pluginGroup
