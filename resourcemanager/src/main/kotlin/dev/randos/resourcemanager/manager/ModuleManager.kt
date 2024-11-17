@@ -10,7 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory
  *
  * @property moduleFile The root directory of the module.
  */
-class ModuleManager(private val moduleFile: File) {
+internal class ModuleManager(private val moduleFile: File) {
     /**
      * Retrieves the namespace of the module by checking both the build.gradle file and the AndroidManifest.xml.
      * It prioritizes the namespace specified in the build.gradle file.

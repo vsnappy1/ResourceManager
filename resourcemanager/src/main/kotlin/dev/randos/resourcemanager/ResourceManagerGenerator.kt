@@ -7,12 +7,11 @@ import java.io.File
 
 internal class ResourceManagerGenerator(
     private val moduleFile: File,
-    private val generatedFile: File
+    private val generatedFile: File,
+    private val moduleManager: ModuleManager = ModuleManager(moduleFile),
+    private val resourceManager: ResourceManager = ResourceManager(moduleFile)
 ) {
     fun generate() {
-        val moduleManager = ModuleManager(moduleFile)
-        val resourceManager = ResourceManager(moduleFile)
-
         try {
             // Ensure directory exists before writing to the file.
             generatedFile.parentFile.mkdirs()
