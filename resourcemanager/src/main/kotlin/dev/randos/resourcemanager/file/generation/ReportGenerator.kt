@@ -18,100 +18,99 @@ internal object ReportGenerator {
      */
     fun generateMigrationReport(files: List<SourceFileDetails>): String {
         val report = StringBuilder()
+
+        fun StringBuilder.appendLine(
+            indentation: Int = 0,
+            content: String
+        ) {
+            repeat(indentation) { append("\t") }
+            appendLine(content)
+        }
+
         report.apply {
-            appendLine("<!DOCTYPE html>")
-            appendLine("<html lang=\"en\">")
-            appendLine("<head>")
-            appendLine("<meta charset=\"UTF-8\">")
-            appendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
-            appendLine("<title>Migration Report</title>")
-            appendLine("<style>")
+            appendLine(0, "<!DOCTYPE html>")
+            appendLine(0, "<html lang=\"en\">")
+            appendLine(1, "<head>")
+            appendLine(2, "<meta charset=\"UTF-8\">")
+            appendLine(2, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
+            appendLine(2, "<title>Migration Report</title>")
+            appendLine(2, "<style>")
             appendLine(
                 """
                 body {
                     font-family: Arial, sans-serif;
                     margin: 20px;
                 }
-                
                 h1 {
                     color: #333;
                 }
-                
                 table {
                     width: 100%;
                     border-collapse: collapse;
                     margin-bottom: 20px;
                 }
-                
                 th, td {
                     padding: 10px;
                     border: 1px solid #ccc;
                 }
-                
                 th {
                     background-color: #f2f2f2;
                     text-align: left;
                 }
-                
                 tr:nth-child(even) {
                     background-color: #f9f9f9;
                 }
-                
                 .file-section {
                     margin-top: 20px;
                 }
-                
                 .change-header {
                     font-weight: bold;
                     color: #555;
                     margin-top: 10px;
                 }
-                
                 .line-number {
                     font-style: italic;
                     color: #888;
                 }
-                
                 .current {
                     color: #d9534f;
                 }
-                
                 .updated {
                     color: #5cb85c;
                 }
-                """.trimIndent()
+                """.trimIndent().prependIndent("\t\t\t")
             )
-            appendLine("</style>")
-            appendLine("</head>")
-            appendLine("<body>")
-            appendLine("<h1>Resource Manager Migration Report</h1>")
-            appendLine("<p>Generated on ${getFormattedDate()}</p>")
+            appendLine(2, "</style>")
+            appendLine(1, "</head>")
+            appendLine(1, "<body>")
+            appendLine(2, "<h1>Resource Manager Migration Report</h1>")
+            appendLine(2, "<p>Generated on ${getFormattedDate()}</p>")
 
             for (file in files) {
-                appendLine("<div class=\"file-section\">")
-                appendLine("<h2>File: ${file.name}</h2>")
-                appendLine("<p><strong>Path:</strong> ${file.path}</p>")
-                appendLine("<table>")
-                appendLine("<tr>")
-                appendLine("<th style=\"width: 10%;\">Line Number</th>")
-                appendLine("<th style=\"width: 55%;\">Original Code</th>")
-                appendLine("<th style=\"width: 35%;\">Updated Code</th>")
-                appendLine("</tr>")
+                appendLine(2, "<div class=\"file-section\">")
+                appendLine(3, "<h2>File: ${file.name}</h2>")
+                appendLine(3, "<p><strong>Path:</strong> ${file.path}</p>")
+                appendLine(3, "<table>")
+                appendLine(4, "<tr>")
+                appendLine(5, "<th style=\"width: 10%;\">Line Number</th>")
+                appendLine(5, "<th style=\"width: 55%;\">Original Code</th>")
+                appendLine(5, "<th style=\"width: 35%;\">Updated Code</th>")
+                appendLine(4, "</tr>")
 
                 for (change in file.changes) {
-                    appendLine("<tr>")
-                    appendLine("<td class=\"line-number\">${change.lineNumber}</td>")
-                    appendLine("<td class=\"current\">${change.current.escapeHtml()}</td>")
-                    appendLine("<td class=\"updated\">${change.updated.escapeHtml()}</td>")
-                    appendLine("</tr>")
+                    appendLine(4, "<tr>")
+                    appendLine(5, "<td class=\"line-number\">${change.lineNumber}</td>")
+                    appendLine(5, "<td class=\"current\">${change.current.escapeHtml()}</td>")
+                    appendLine(5, "<td class=\"updated\">${change.updated.escapeHtml()}</td>")
+                    appendLine(4, "</tr>")
                 }
 
-                appendLine("</table>")
-                appendLine("</div>")
+                appendLine(3, "</table>")
+                appendLine(2, "</div>")
             }
 
-            appendLine("</body>")
-            appendLine("</html>")
+            appendLine(1, "</body>")
+            appendLine(0, "</html>")
         }
 
         return report.toString()
