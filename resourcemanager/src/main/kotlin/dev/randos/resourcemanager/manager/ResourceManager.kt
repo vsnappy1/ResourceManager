@@ -11,13 +11,15 @@ import java.io.File
  *
  * @param moduleFile The root directory of the module being managed.
  */
-internal class ResourceManager(private val moduleFile: File) {
+internal class ResourceManager(
+    private val moduleFile: File,
+    private val moduleManager: ModuleManager = ModuleManager(moduleFile)
+) {
     /**
      * Returns resource files under observation such as strings.xml, dimens.xml, ic_gift.png etc,
      * which are taken as input to generate ResourceManager (a generated class).
      */
     fun getFilesUnderObservation(): List<File> {
-        val moduleManager = ModuleManager(moduleFile)
         val resources = getResources(moduleFile, moduleManager.getModuleDependencies())
         // Return resource files and build.gradle(.kts) file to be observed for change.
         return resources.getFilesUnderObservation() + listOf(moduleManager.getBuildGradleFile())
