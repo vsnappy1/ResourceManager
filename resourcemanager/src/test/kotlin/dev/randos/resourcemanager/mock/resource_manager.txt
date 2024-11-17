@@ -1,0 +1,81 @@
+package com.example.application
+
+import android.app.Application
+import android.graphics.drawable.Drawable
+import android.content.res.Resources.Theme
+import com.example.application.R
+
+object ResourceManager {
+
+	private var _application: Application? = null
+	private val application: Application
+		get() = _application ?: throw IllegalStateException("ResourceManager is not initialized. Please call ResourceManager.initialize(this) in your Application class.")
+
+	@JvmStatic
+	fun initialize(application: Application) {
+		_application = application
+	}
+
+	// ----- VALUES -----
+	object Colors {
+		@JvmOverloads @JvmStatic fun black(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.black, theme)
+		@JvmOverloads @JvmStatic fun black_lib2(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib2.R.color.black, theme)
+		@JvmOverloads @JvmStatic fun colorRes(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.color_res, theme)
+		@JvmOverloads @JvmStatic fun colorRes_lib1(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib1.R.color.color_res, theme)
+		@JvmOverloads @JvmStatic fun white(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.white, theme)
+		@JvmOverloads @JvmStatic fun white_lib2(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib2.R.color.white, theme)
+	}
+
+	object Strings {
+		@JvmStatic fun stringParameterizedRes(vararg args: Any = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(R.string.string_parameterized_res) else application.resources.getString(R.string.string_parameterized_res, *args)
+		@JvmStatic fun stringParameterizedRes_lib1(vararg args: Any = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(com.example.lib1.R.string.string_parameterized_res) else application.resources.getString(com.example.lib1.R.string.string_parameterized_res, *args)
+		@JvmStatic fun stringRes() : String = application.resources.getString(R.string.string_res)
+		@JvmStatic fun stringRes_lib1() : String = application.resources.getString(com.example.lib1.R.string.string_res)
+	}
+
+	object Booleans {
+		@JvmStatic fun boolRes() : Boolean = application.resources.getBoolean(R.bool.bool_res)
+		@JvmStatic fun boolRes_lib1() : Boolean = application.resources.getBoolean(com.example.lib1.R.bool.bool_res)
+	}
+
+	object Dimensions {
+		@JvmStatic fun dimenRes() : Float = application.resources.getDimension(R.dimen.dimen_res)
+		@JvmStatic fun dimenRes_lib1() : Float = application.resources.getDimension(com.example.lib1.R.dimen.dimen_res)
+	}
+
+	object Fractions {
+		@JvmStatic fun fractionRes(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(R.fraction.fraction_res, base, pbase)
+		@JvmStatic fun fractionRes_lib1(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(com.example.lib1.R.fraction.fraction_res, base, pbase)
+	}
+
+	object Integers {
+		@JvmStatic fun integerRes() : Int = application.resources.getInteger(R.integer.integer_res)
+		@JvmStatic fun integerRes_lib1() : Int = application.resources.getInteger(com.example.lib1.R.integer.integer_res)
+	}
+
+	object StringArrays {
+		@JvmStatic fun arrayRes() : kotlin.Array<String> = application.resources.getStringArray(R.array.array_res)
+		@JvmStatic fun arrayRes_lib1() : kotlin.Array<String> = application.resources.getStringArray(com.example.lib1.R.array.array_res)
+		@JvmStatic fun stringArrayRes() : kotlin.Array<String> = application.resources.getStringArray(R.array.string_array_res)
+		@JvmStatic fun stringArrayRes_lib1() : kotlin.Array<String> = application.resources.getStringArray(com.example.lib1.R.array.string_array_res)
+	}
+
+	object IntArrays {
+		@JvmStatic fun intArrayRes() : IntArray = application.resources.getIntArray(R.array.int_array_res)
+		@JvmStatic fun intArrayRes_lib1() : IntArray = application.resources.getIntArray(com.example.lib1.R.array.int_array_res)
+	}
+
+	object Plurals {
+		@JvmStatic fun pluralsRes(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(R.plurals.plurals_res, quantity, args)
+		@JvmStatic fun pluralsRes_lib1(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(com.example.lib1.R.plurals.plurals_res, quantity, args)
+	}
+
+	// ----- DRAWABLES -----
+	object Drawables {
+		@JvmOverloads @JvmStatic fun icLauncherForeground(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.ic_launcher_foreground, theme)
+		@JvmOverloads @JvmStatic fun icArrow(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.ic_arrow, theme)
+		@JvmOverloads @JvmStatic fun icGift(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.ic_gift, theme)
+		@JvmOverloads @JvmStatic fun icCart_lib1(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(com.example.lib1.R.drawable.ic_cart, theme)
+		@JvmOverloads @JvmStatic fun icDone_lib2(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(com.example.lib2.R.drawable.ic_done, theme)
+	}
+}
