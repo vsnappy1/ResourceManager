@@ -19,6 +19,7 @@ dependencies {
     compileOnly("com.android.tools.build:gradle:$agp")
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+    testImplementation(gradleTestKit())
 }
 
 group = pluginGroup

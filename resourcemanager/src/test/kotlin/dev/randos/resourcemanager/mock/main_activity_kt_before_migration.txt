@@ -1,0 +1,58 @@
+package com.example.myapplication
+
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        Log.d("TAG", "onCreate: ${getString(R.string.string_res)}")
+
+        val view = View(baseContext)
+        getString(R.string.string_res)
+        baseContext.getString(R.string.string_res)
+        var appName = baseContext.resources.getString(R.string.string_res)
+        appName = abc.requireContext().getString(R.string.string_res)
+        appName = view.context.xyz().tess.getString(R.string.string_res)
+//        abc.requireContext().getString(R.string.string_res)
+        getString(R.string.string_parameterized_res, "Kumar")
+        appName = getString(com.example.module.R.string.string_res) // From library
+
+        jkl().getString(R.string.string_parameterized_res, "Kumar")
+        mno().stu.getString(R.string.string_parameterized_res, "Kumar")
+        pqr().jkl.abc().getString(R.string.string_parameterized_res, "Kumar")
+
+        getString(com.example.module.R.string.string_parameterized_res, "hello")
+
+        getColor(R.color.color_res)
+        ContextCompat.getColor(baseContext, R.color.color_res)
+        resources.getColor(R.color.color_res, theme)
+
+        val drawable = getDrawable(R.drawable.ic_repeat)
+        ContextCompat.getDrawable(baseContext, R.drawable.ic_launcher_foreground)
+        ContextCompat.getDrawable(baseContext, R.drawable.ic_repeat)
+        resources.getDrawable(R.drawable.ic_repeat, theme)
+        AppCompatResources.getDrawable(baseContext, R.drawable.ic_repeat)
+        getDrawable(com.example.module.R.drawable.ic_app_icon)
+
+        resources.getStringArray(R.array.string_array_res).forEach {
+            // Do something
+        }
+
+        if (resources.getBoolean(R.bool.bool_res)) {
+            // Do something
+        }
+
+        val intArray = resources.getIntArray(R.array.int_array_res)
+        val fraction = resources.getFraction(R.fraction.fraction_res, 0, 7)
+        val dimension = resources.getDimension(R.dimen.dimen_res)
+        val integer = resources.getInteger(R.integer.integer_res)
+        val quantity = resources.getQuantityString(R.plurals.plurals_res, 0)
+    }
+}

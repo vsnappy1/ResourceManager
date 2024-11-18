@@ -1,0 +1,58 @@
+package com.example.myapplication
+
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        Log.d("TAG", "onCreate: ${ResourceManager.Strings.stringRes()}")
+
+        val view = View(baseContext)
+        ResourceManager.Strings.stringRes()
+        ResourceManager.Strings.stringRes()
+        var appName = ResourceManager.Strings.stringRes()
+        appName = ResourceManager.Strings.stringRes()
+        appName = ResourceManager.Strings.stringRes()
+//        ResourceManager.Strings.stringRes()
+        ResourceManager.Strings.stringParameterizedRes("Kumar")
+        appName = ResourceManager.Strings.stringRes_module() // From library
+
+        ResourceManager.Strings.stringParameterizedRes("Kumar")
+        ResourceManager.Strings.stringParameterizedRes("Kumar")
+        ResourceManager.Strings.stringParameterizedRes("Kumar")
+
+        ResourceManager.Strings.stringParameterizedRes_module("hello")
+
+        ResourceManager.Colors.colorRes()
+        ResourceManager.Colors.colorRes()
+        ResourceManager.Colors.colorRes(theme)
+
+        val drawable = ResourceManager.Drawables.icRepeat()
+        ContextCompat.getDrawable(baseContext, R.drawable.ic_launcher_foreground)
+        ResourceManager.Drawables.icRepeat()
+        ResourceManager.Drawables.icRepeat(theme)
+        ResourceManager.Drawables.icRepeat()
+        ResourceManager.Drawables.icAppIcon_module()
+
+        ResourceManager.StringArrays.stringArrayRes().forEach {
+            // Do something
+        }
+
+        if (ResourceManager.Booleans.boolRes()) {
+            // Do something
+        }
+
+        val intArray = ResourceManager.IntArrays.intArrayRes()
+        val fraction = ResourceManager.Fractions.fractionRes(0, 7)
+        val dimension = ResourceManager.Dimensions.dimenRes()
+        val integer = ResourceManager.Integers.integerRes()
+        val quantity = ResourceManager.Plurals.pluralsRes(0)
+    }
+}

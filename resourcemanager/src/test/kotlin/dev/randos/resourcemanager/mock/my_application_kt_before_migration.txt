@@ -1,0 +1,15 @@
+package com.example.application
+
+import android.app.Application
+import com.example.module.R
+
+class MyApplication: Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        ResourceManager.initialize(this)
+
+        getString(com.example.app.R.string.string_res)
+        getString(R.string.string_res)
+    }
+}
