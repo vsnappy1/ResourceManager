@@ -29,7 +29,7 @@ internal object ClassFileGenerator {
             appendLine("\t\t_application = application")
             appendLine("\t}\n")
 
-            val resourceMap = files.groupBy { it.type }
+            val resourceMap = files.groupBy { it.type }.toSortedMap(resourceTypeComparator())
 
             resourceMap.forEach { (resourceType, value) ->
                 appendLine("\t// ----- ${resourceType::class.simpleName} -----")
@@ -47,10 +47,23 @@ internal object ClassFileGenerator {
         }.toString()
     }
 
+    private fun resourceTypeComparator() =
+        object : Comparator<ResourceType> {
+            override fun compare(
+                rt1: ResourceType,
+                rt2: ResourceType
+            ): Int {
+                val name1 = rt1::class.simpleName
+                val name2 = rt2::class.simpleName
+                if (name1 == null || name2 == null) return 0
+                return name2 compareTo name1
+            }
+        }
+
     private fun StringBuilder.generateObjectForDrawableResources(resources: List<Resource>) {
         appendLine("\tobject Drawables {")
         resources.forEach { resource ->
-            resource.moduleDetails.resDirectory.listFiles()?.forEach { file ->
+            resource.moduleDetails.resDirectory.listFiles()?.sorted()?.forEach { file ->
                 appendDrawableResource(
                     name = file.nameWithoutExtension,
                     defaultIndentation = "\t\t",
@@ -76,8 +89,8 @@ internal object ClassFileGenerator {
             }
         }
 
-        map.forEach {
-            val resourceObject = generateObject("${it.key}s", it.value)
+        map.toSortedMap().forEach {
+            val resourceObject = generateObject("${it.key}s", it.value.sortedBy { pair -> pair.second.name })
             appendLine(resourceObject)
         }
     }
