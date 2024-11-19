@@ -12,7 +12,10 @@ import java.io.File
  * android resources (drawables, strings, etc).
  *
  */
-internal class MigrationManager(private val projectDir: File) {
+internal class MigrationManager(
+    private val projectDir: File,
+    private val moduleDir: File
+) {
     /**
      * A common regex pattern used to match optional method or property chains preceding a resource call.
      *
@@ -95,8 +98,8 @@ internal class MigrationManager(private val projectDir: File) {
     }
 
     fun migrate() {
-        val moduleManager = ModuleManager(projectDir)
-        val resourceManager = ResourceManager(projectDir)
+        val moduleManager = ModuleManager(moduleDir)
+        val resourceManager = ResourceManager(projectDir, moduleDir)
         val sourceFiles = getSourceFiles()
 
         val namespaceModuleMap = getNamespaceModuleMap(moduleManager)
@@ -294,7 +297,7 @@ internal class MigrationManager(private val projectDir: File) {
      * @return A list of [File] objects representing the source files found in the `src/main` directory.
      */
     private fun getSourceFiles(): List<File> {
-        val sourceDirectory = projectDir.resolve("src/main")
+        val sourceDirectory = moduleDir.resolve("src/main")
         val sourceFiles = sourceDirectory.walkTopDown().filter { it.isSourceFile() }.toList()
         return sourceFiles
     }
@@ -312,7 +315,7 @@ internal class MigrationManager(private val projectDir: File) {
         val map = mutableMapOf<String, String>()
         map[moduleManager.getNamespace().orEmpty()] = ""
         moduleManager.getModuleDependencies().forEach { moduleName ->
-            val module = projectDir.parentFile?.resolve(moduleName)
+            val module = moduleDir.parentFile?.resolve(moduleName)
             if (module != null) {
                 map[ModuleManager(module).getNamespace().orEmpty()] = module.name
             }
@@ -337,7 +340,7 @@ internal class MigrationManager(private val projectDir: File) {
     private fun generateMigrationReport(files: List<SourceFileDetails>) {
         val report =
             File(
-                projectDir,
+                moduleDir,
                 "build/reports/migration/resourcemanager-migration-report.html"
             )
         report.parentFile.mkdirs()

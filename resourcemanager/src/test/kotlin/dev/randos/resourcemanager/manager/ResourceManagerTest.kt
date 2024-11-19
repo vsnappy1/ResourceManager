@@ -23,8 +23,9 @@ class ResourceManagerTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        moduleFile = Files.createTempDirectory("app").toFile()
-        resourceManager = ResourceManager(moduleFile, moduleManager)
+        val projectDir = Files.createTempDirectory("project").toFile()
+        moduleFile = File(projectDir, "app")
+        resourceManager = ResourceManager(projectDir, moduleFile, moduleManager)
     }
 
     @After

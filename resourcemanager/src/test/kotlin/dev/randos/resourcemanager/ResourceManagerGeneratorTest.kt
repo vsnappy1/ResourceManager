@@ -29,14 +29,14 @@ class ResourceManagerGeneratorTest {
     @Before
     fun setUp() {
         mockkObject(ClassFileGenerator)
-
-        moduleFile = Files.createTempDirectory("app").toFile()
+        val projectDir = Files.createTempDirectory("project").toFile()
+        moduleFile = File(projectDir, "app")
         generatedFile =
             File(moduleFile, "build/generated/source/resourcemanager/main/ResourceManager.kt")
         moduleManager = mockk()
         resourceManager = mockk()
         resourceManagerGenerator =
-            ResourceManagerGenerator(moduleFile, generatedFile, moduleManager, resourceManager)
+            ResourceManagerGenerator(projectDir, moduleFile, generatedFile, moduleManager, resourceManager)
     }
 
     @After
@@ -54,7 +54,7 @@ class ResourceManagerGeneratorTest {
 
         every { moduleManager.getNamespace() } returns "com.example.app"
         every { moduleManager.getModuleDependencies() } returns emptyList()
-        every { resourceManager.getResources(any(), any()) } returns emptyList()
+        every { resourceManager.getResources() } returns emptyList()
         every { ClassFileGenerator.generateClassFile(any(), any()) } returns classContent
 
         // When
@@ -70,7 +70,7 @@ class ResourceManagerGeneratorTest {
         // Given
         every { moduleManager.getNamespace() } returns null
         every { moduleManager.getModuleDependencies() } returns emptyList()
-        every { resourceManager.getResources(any(), any()) } returns emptyList()
+        every { resourceManager.getResources() } returns emptyList()
 
         // When
         resourceManagerGenerator.generate()

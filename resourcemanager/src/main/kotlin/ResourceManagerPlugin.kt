@@ -21,8 +21,8 @@ class ResourceManagerPlugin : Plugin<Project> {
         val generatedFile = File(mainDirectory, "$namespacePath/ResourceManager.kt")
 
         // Initialize the ResourceManagerGenerator responsible for generating the Kotlin code.
-        val resourceManagerGenerator = ResourceManagerGenerator(project.projectDir, generatedFile)
-        val resourceManager = ResourceManager(project.projectDir)
+        val resourceManagerGenerator = ResourceManagerGenerator(project.rootDir, project.projectDir, generatedFile)
+        val resourceManager = ResourceManager(project.rootDir, project.projectDir)
 
         // Register a new Gradle task to generate the ResourceManager code.
         val generateResourceManagerTask =

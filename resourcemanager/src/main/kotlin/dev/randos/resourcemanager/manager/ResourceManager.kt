@@ -12,6 +12,7 @@ import java.io.File
  * @param moduleFile The root directory of the module being managed.
  */
 internal class ResourceManager(
+    private val projectDir: File,
     private val moduleFile: File,
     private val moduleManager: ModuleManager = ModuleManager(moduleFile)
 ) {
@@ -20,7 +21,7 @@ internal class ResourceManager(
      * which are taken as input to generate ResourceManager (a generated class).
      */
     fun getFilesUnderObservation(): List<File> {
-        val resources = getResources(moduleFile, moduleManager.getModuleDependencies())
+        val resources = getResources()
         // Return resource files and build.gradle(.kts) file to be observed for change.
         return resources.getFilesUnderObservation() + listOf(moduleManager.getBuildGradleFile())
     }
@@ -31,12 +32,9 @@ internal class ResourceManager(
      *
      * @return A list of [Resource].
      */
-    fun getResources(
-        moduleFile: File,
-        moduleDependencies: List<String>
-    ): List<Resource> {
+    fun getResources(): List<Resource> {
         val list = mutableListOf<Resource>()
-
+        val moduleDependencies = moduleManager.getModuleDependencies()
         var resFile = File(moduleFile, "src/main/res")
 
         // Locate the "values" directory within the "res" directory.
@@ -58,9 +56,8 @@ internal class ResourceManager(
         /*
          Also add resources for project dependencies. (i.e. implementation(project(":my_library")))
          */
-        val projectFile = moduleFile.parentFile
         moduleDependencies.forEach { module ->
-            val dependencyModuleFile = File(projectFile, module)
+            val dependencyModuleFile = File(projectDir, module)
             resFile = File(dependencyModuleFile, "src/main/res")
 
             ModuleManager(dependencyModuleFile).getNamespace()?.let { namespace ->

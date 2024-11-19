@@ -70,7 +70,8 @@ internal class ModuleManager(private val moduleFile: File) {
             dependencyPatterns.forEach { pattern ->
                 val mathResults = pattern.find(line)
                 mathResults?.run {
-                    dependencies.add(mathResults.groupValues[1])
+                    // replace(":","/") ensures nested module is also considered.
+                    dependencies.add(mathResults.groupValues[1].replace(":", "/"))
                 }
             }
         }

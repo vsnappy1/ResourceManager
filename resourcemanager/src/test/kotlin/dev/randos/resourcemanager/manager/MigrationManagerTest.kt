@@ -23,7 +23,7 @@ class MigrationManagerTest {
         projectDir = Files.createTempDirectory("dummy").toFile()
         app = File(projectDir, "app").also { it.mkdirs() }
         moduleDir = File(projectDir, "module").also { it.mkdirs() }
-        migrationManager = MigrationManager(app)
+        migrationManager = MigrationManager(projectDir, app)
         app.mkdirs()
         val buildGradleFileContent =
             """

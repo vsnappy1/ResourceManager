@@ -7,7 +7,7 @@ import org.gradle.api.tasks.TaskAction
 import org.jetbrains.annotations.TestOnly
 
 internal abstract class ResourceManagerMigrationTask : DefaultTask() {
-    private var migrationManager: MigrationManager = MigrationManager(project.projectDir)
+    private var migrationManager: MigrationManager = MigrationManager(project.rootDir, project.projectDir)
 
     @TaskAction
     fun run() {
