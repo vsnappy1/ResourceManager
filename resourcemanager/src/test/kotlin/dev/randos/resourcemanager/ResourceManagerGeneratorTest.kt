@@ -9,6 +9,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -66,7 +67,7 @@ class ResourceManagerGeneratorTest {
     }
 
     @Test
-    fun generate_whenNamespaceNotFound_shouldNotWriteToFileAndPrintException() {
+    fun generate_whenNamespaceNotFound_shouldNotCreateFile() {
         // Given
         every { moduleManager.getNamespace() } returns null
         every { moduleManager.getModuleDependencies() } returns emptyList()
@@ -76,6 +77,6 @@ class ResourceManagerGeneratorTest {
         resourceManagerGenerator.generate()
 
         // Then
-        assertEquals("", generatedFile.readText())
+        assertFalse(generatedFile.exists())
     }
 }

@@ -18,19 +18,14 @@ internal class ResourceManagerGenerator(
             generatedFile.parentFile.mkdirs()
 
             // Write the generated class content to the file
-            generatedFile.bufferedWriter().use { out ->
-
-                val classFile =
-                    ClassFileGenerator.generateClassFile(
-                        namespace =
-                            moduleManager.getNamespace()
-                                ?: throw IllegalStateException("Namespace could not be found in either build.gradle, build.gradle.kts or AndroidManifest.xml. Please ensure the module is properly configured."),
-                        files = resourceManager.getResources()
-                    )
-
-                out.write(classFile)
-                out.close()
-            }
+            val resourceManagerClassContent =
+                ClassFileGenerator.generateClassFile(
+                    namespace =
+                        moduleManager.getNamespace()
+                            ?: throw IllegalStateException("Namespace could not be found in either build.gradle(.kts) or AndroidManifest.xml. Please ensure the module is properly configured."),
+                    files = resourceManager.getResources()
+                )
+            generatedFile.writeText(resourceManagerClassContent)
         } catch (e: Exception) {
             println("Error: ${e.localizedMessage}")
             e.printStackTrace()
