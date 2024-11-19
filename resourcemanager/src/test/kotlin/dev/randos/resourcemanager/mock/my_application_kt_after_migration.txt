@@ -1,6 +1,7 @@
 package com.example.application
 
 import android.app.Application
+import com.example.module.R
 import com.example.app.ResourceManager
 
 class MyApplication: Application() {

@@ -115,6 +115,8 @@ internal class MigrationManager(
             // Namespace found in import statements.
             var currentNamespace = ""
 
+            var currentResourceImportStatement: String? = null
+
             // Flag to see if import is from any library.
             var isLibraryResourceImport = false
 
@@ -128,19 +130,9 @@ internal class MigrationManager(
                 // Check if it is a import statement.
                 val matchResultImport = importStatementRegex.find(line)
                 if (matchResultImport?.groups?.size == 2) {
-                    val semiColan = if (sourceFile.extension == "java") ";" else ""
-                    val currentImportStatement = matchResultImport.groups[0]?.value.orEmpty()
-                    val newImportStatement = "import $namespace.ResourceManager$semiColan"
-
-                    val newLine =
-                        line.replace(currentImportStatement, newImportStatement)
-                    fileContent.appendLine(newLine)
-
+                    currentResourceImportStatement = matchResultImport.groups[0]?.value.orEmpty()
                     currentNamespace = matchResultImport.groups[1]?.value.orEmpty()
                     isLibraryResourceImport = currentNamespace != namespace
-                    changes.add(Change(index, currentImportStatement, newImportStatement))
-                    logUpdatedLine(sourceFile, index)
-                    continue
                 }
 
                 // Check if it is resource access.
@@ -245,7 +237,8 @@ internal class MigrationManager(
 
             // If some changes are done to the file content rewrite the file content.
             if (changes.isNotEmpty()) {
-                sourceFile.writeText(fileContent.toString())
+                val contentToWrite = getContentToWrite(fileContent, sourceFile, namespace, currentResourceImportStatement, changes, index)
+                sourceFile.writeText(contentToWrite)
                 updatedSourceFiles.add(
                     SourceFileDetails(sourceFile.name, sourceFile.absolutePath, changes)
                 )
@@ -257,6 +250,28 @@ internal class MigrationManager(
         )
         generateMigrationReport(updatedSourceFiles)
         println("\n***************** MIGRATION END *****************\n")
+    }
+
+    private fun getContentToWrite(
+        fileContent: StringBuilder,
+        sourceFile: File,
+        namespace: String?,
+        currentResourceImportStatement: String?,
+        changes: MutableList<Change>,
+        index: Int
+    ): String {
+        if (currentResourceImportStatement == null) return fileContent.toString()
+
+        var contentToWrite = fileContent.toString()
+
+        val semiColan = if (sourceFile.extension == "java") ";" else ""
+        val resourcemanagerImportStatement = "import $namespace.ResourceManager$semiColan"
+        // Add the resourcemanager import statement.
+        val newImportStatement = "$currentResourceImportStatement\n$resourcemanagerImportStatement"
+        contentToWrite = contentToWrite.replace(currentResourceImportStatement, newImportStatement)
+        changes.add(Change(index, currentResourceImportStatement, newImportStatement))
+        logUpdatedLine(sourceFile, index)
+        return contentToWrite
     }
 
     /**
