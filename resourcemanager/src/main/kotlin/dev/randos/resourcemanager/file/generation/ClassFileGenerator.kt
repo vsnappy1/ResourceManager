@@ -238,15 +238,9 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getMethodName(resource, moduleDetails)
-        if (resource.type is ValueResourceType.String && resource.type.isParameterized) {
-            appendLine(
-                "$defaultIndentation@JvmStatic fun $methodName(vararg args: Any = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
-            )
-        } else {
-            appendLine(
-                "$defaultIndentation@JvmStatic fun $methodName() : String = application.resources.getString(${namespaceString}R.string.${resource.name})"
-            )
-        }
+        appendLine(
+            "$defaultIndentation@JvmStatic fun $methodName(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
+        )
     }
 
     private fun StringBuilder.appendPluralResource(
