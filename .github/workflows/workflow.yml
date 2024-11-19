@@ -41,8 +41,17 @@ jobs:
       - name: Run Lint Check
         run: ./gradlew ktlintCheck
 
-      - name: Run Tests
-        run: ./gradlew test
+      - name: Run Code Coverage Check
+        run:  ./gradlew verifyCodeCoverage
+
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: CodeCoverageReport
+          path: build/reports/jacoco/generateCodeCoverageReport/html
+
+      - name: Add Link to Coverage Report
+        run: echo "📊 [View Code Coverage Report](./build/reports/jacoco/generateCodeCoverageReport/html/index.html)" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish to Gradle Plugin Portal
         run: ./gradlew publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_PUBLISH_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_PUBLISH_SECRET }}

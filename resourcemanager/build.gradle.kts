@@ -7,7 +7,10 @@ plugins {
     id("com.gradle.plugin-publish") version "1.3.0"
     id("maven-publish")
     id("org.jlleitschuh.gradle.ktlint")
+    jacoco
 }
+apply(from = "../gradle/jacoco.gradle.kts")
+
 val agp: String by project
 val pluginGroup = "dev.randos"
 val pluginVersion = "0.0.2"
