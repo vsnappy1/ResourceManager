@@ -312,8 +312,11 @@ internal object ClassFileGenerator {
      *
      * @return The formatted module name string, or an empty string if no module name is provided.
      */
-    private fun getModuleNameString(moduleDetails: ModuleDetails) =
-        if (moduleDetails.moduleName.isNotEmpty()) "_${moduleDetails.moduleName.toCamelCase()}" else ""
+    private fun getModuleNameString(moduleDetails: ModuleDetails): String {
+        // Replace all non-word characters in module name with _
+        val moduleName = moduleDetails.moduleName.replace(Regex("\\W"), "_")
+        return if (moduleDetails.moduleName.isNotEmpty()) "_${moduleName.toCamelCase()}" else ""
+    }
 
     /**
      * Retrieves the namespace from the module details, if specified, followed by a period.

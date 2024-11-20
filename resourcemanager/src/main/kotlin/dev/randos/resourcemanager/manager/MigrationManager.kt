@@ -23,7 +23,7 @@ internal class MigrationManager(
      * - `someObject.`
      * - `methodCall().`
      */
-    private val common = "(?:\\w+\\.|\\w+(?:<.*>)?\\(\\)\\.)*"
+    private val common = "(?:\\w+\\??\\.|\\w+(?:<.*>)?\\(\\)\\??\\.)*"
 
     /**
      * A regex pattern to identify import statements for Android resource classes.

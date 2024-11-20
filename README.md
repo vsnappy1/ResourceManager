@@ -5,26 +5,41 @@ ResourceManager is an Android plugin that simplifies accessing Android resources
 
 ## Setup
 
-### Step 1: Set Up the ResourceManager Plugin (project)
+### Step 1: Add ResourceManager Plugin
 Add the resourcemanager plugin to your project's (root) __build.gradle__.
 ```kotlin
 plugins {
     id("com.android.application") version "8.0.1" apply false
     id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id(dev.randos.resourcemanager") version "0.0.2" apply false    // Add this line for ResourceManager support
+    id("dev.randos.resourcemanager") version "0.0.4" apply false    // Add this line for ResourceManager support
+}
+```
+Or
+```kotlin
+buildScripts {
+    ...
+    dependencies {
+        ...
+        classpath 'dev.randos:resourcemanager:0.0.4'    // Add this line for ResourceManager support
+    }
 }
 ```
 
-### Step 2: Set Up the ResourceManager Plugin (module)
-Add the ResourceManager plugin in your module-level __build.gradle__.
+### Step 2: Apply ResourceManager Plugin
+Apply ResourceManager plugin in your module-level __build.gradle__.
 ```kotlin
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     ...
-    id("dev.randos.resourcemanager")  // Apply ResourceManager
+    id("dev.randos.resourcemanager")    // Apply ResourceManager
 }
+```
+Or
+```kotlin
+apply plugin: 'com.android.application'
+...
+apply plugin: 'dev.randos.resourcemanager'    // Apply ResourceManager
 ```
 
 ### Step 3: Initialize ResourceManager
