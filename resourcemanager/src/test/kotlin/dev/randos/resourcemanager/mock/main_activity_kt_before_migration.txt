@@ -22,13 +22,13 @@ class MainActivity : AppCompatActivity() {
         appName = view.context.xyz().tess.getString(R.string.string_res)
 //        abc.requireContext().getString(R.string.string_res)
         getString(R.string.string_parameterized_res, "Kumar")
-        appName = getString(com.example.module.R.string.string_res) // From library
+        appName = getString(com.example.module.R.string.string_res_mod) // From library
 
         jkl().getString(R.string.string_parameterized_res, "Kumar")
         mno().stu.getString(R.string.string_parameterized_res, "Kumar")
         pqr().jkl.abc().getString(R.string.string_parameterized_res, "Kumar")
 
-        getString(com.example.module.R.string.string_parameterized_res, "hello")
+        getString(com.example.module.R.string.string_parameterized_res_mod, "hello")
 
         getColor(R.color.color_res)
         ContextCompat.getColor(baseContext, R.color.color_res)
@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         val intArray = resources.getIntArray(R.array.int_array_res)
         val fraction = resources.getFraction(R.fraction.fraction_res, 0, 7)
         val dimension = resources.getDimension(R.dimen.dimen_res)
+        // We have same id (integer_res) in both app and module package (Skipped).
         val integer = resources.getInteger(R.integer.integer_res)
         val quantity = resources.getQuantityString(R.plurals.plurals_res, 0)
     }

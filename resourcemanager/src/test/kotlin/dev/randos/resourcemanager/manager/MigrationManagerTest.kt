@@ -62,7 +62,7 @@ class MigrationManagerTest {
 
         File(valueResDir, "resources.xml").writeText(MockFileReader.read("all_resources.txt"))
         File(drawableResDir, "ic_repeat.xml").writeText("<p>Drawable</p>")
-        File(moduleValueResDir, "resources.xml").writeText(MockFileReader.read("all_resources.txt"))
+        File(moduleValueResDir, "resources.xml").writeText(MockFileReader.read("all_resources_module.txt"))
         File(moduleDrawableResDir, "ic_app_icon.xml").writeText("<p>Drawable</p>")
     }
 

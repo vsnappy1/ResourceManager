@@ -22,13 +22,13 @@ class MainActivity : AppCompatActivity() {
         appName = ResourceManager.Strings.stringRes()
 //        ResourceManager.Strings.stringRes()
         ResourceManager.Strings.stringParameterizedRes("Kumar")
-        appName = ResourceManager.Strings.stringRes_module() // From library
+        appName = ResourceManager.Strings.stringResMod_module() // From library
 
         ResourceManager.Strings.stringParameterizedRes("Kumar")
         ResourceManager.Strings.stringParameterizedRes("Kumar")
         ResourceManager.Strings.stringParameterizedRes("Kumar")
 
-        ResourceManager.Strings.stringParameterizedRes_module("hello")
+        ResourceManager.Strings.stringParameterizedResMod_module("hello")
 
         ResourceManager.Colors.colorRes()
         ResourceManager.Colors.colorRes()
@@ -52,7 +52,8 @@ class MainActivity : AppCompatActivity() {
         val intArray = ResourceManager.IntArrays.intArrayRes()
         val fraction = ResourceManager.Fractions.fractionRes(0, 7)
         val dimension = ResourceManager.Dimensions.dimenRes()
-        val integer = ResourceManager.Integers.integerRes()
+        // We have same id (integer_res) in both app and module package (Skipped).
+        val integer = resources.getInteger(R.integer.integer_res)
         val quantity = ResourceManager.Plurals.pluralsRes(0)
     }
 }

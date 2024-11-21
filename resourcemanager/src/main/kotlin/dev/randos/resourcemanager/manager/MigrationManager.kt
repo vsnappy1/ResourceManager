@@ -1,10 +1,13 @@
 package dev.randos.resourcemanager.manager
 
+import dev.randos.resourcemanager.file.generation.ClassFileGenerator
 import dev.randos.resourcemanager.file.generation.ReportGenerator
 import dev.randos.resourcemanager.file.parser.XmlParser
 import dev.randos.resourcemanager.model.Change
+import dev.randos.resourcemanager.model.Resource
+import dev.randos.resourcemanager.model.ResourceType
 import dev.randos.resourcemanager.model.SourceFileDetails
-import dev.randos.resourcemanager.utils.toCamelCase
+import dev.randos.resourcemanager.utils.getXmlFiles
 import java.io.File
 
 /**
@@ -42,21 +45,38 @@ internal class MigrationManager(
      */
     private val replacements: Map<Regex, String> by lazy {
         mapOf(
-            getZeroParamRegex("getBoolean", "bool") to "ResourceManager.Booleans.",
-            getZeroParamRegex("getColor", "color") to "ResourceManager.Colors.",
-            getZeroParamRegex("getDimension", "dimen") to "ResourceManager.Dimensions.",
-            getZeroParamRegex("getDrawable", "drawable") to "ResourceManager.Drawables.",
-            getZeroParamRegex("getIntArray", "array") to "ResourceManager.IntArrays.",
-            getZeroParamRegex("getInteger", "integer") to "ResourceManager.Integers.",
-            getZeroParamRegex("getString", "string") to "ResourceManager.Strings.",
-            getZeroParamRegex("getStringArray", "array") to "ResourceManager.StringArrays.",
-            getOneParamRegex("getColor", "color") to "ResourceManager.Colors.",
-            getOneParamRegex("getDrawable", "drawable") to "ResourceManager.Drawables.",
-            getOneParamRegex("getQuantityString", "plurals") to "ResourceManager.Plurals.",
-            getOneParamRegex("getString", "string") to "ResourceManager.Strings.",
-            getTwoParamRegex("getFraction", "fraction") to "ResourceManager.Fractions."
+            getZeroParamRegex("getBoolean", "bool") to "Booleans",
+            getZeroParamRegex("getColor", "color") to "Colors",
+            getZeroParamRegex("getDimension", "dimen") to "Dimensions",
+            getZeroParamRegex("getDrawable", "drawable") to "Drawables",
+            getZeroParamRegex("getIntArray", "array") to "IntArrays",
+            getZeroParamRegex("getInteger", "integer") to "Integers",
+            getZeroParamRegex("getString", "string") to "Strings",
+            getZeroParamRegex("getStringArray", "array") to "StringArrays",
+            getOneParamRegex("getColor", "color") to "Colors",
+            getOneParamRegex("getDrawable", "drawable") to "Drawables",
+            getOneParamRegex("getQuantityString", "plurals") to "Plurals",
+            getOneParamRegex("getString", "string") to "Strings",
+            getTwoParamRegex("getFraction", "fraction") to "Fractions"
         )
     }
+
+    /**
+     * A map defining the relationship between `ResourceManager` categories and Android resource types.
+     */
+    private val androidResMap =
+        mapOf(
+            "Booleans" to "bool",
+            "Colors" to "color",
+            "Dimensions" to "dimen",
+            "Drawables" to "drawable",
+            "IntArrays" to "array",
+            "Integers" to "integer",
+            "StringArrays" to "array",
+            "Plurals" to "plurals",
+            "Strings" to "string",
+            "Fractions" to "fraction"
+        )
 
     /**
      * Constructs a regex pattern to match resource retrieval methods with no additional parameter.
@@ -102,23 +122,17 @@ internal class MigrationManager(
         val resourceManager = ResourceManager(projectDir, moduleDir)
         val sourceFiles = getSourceFiles()
 
-        val namespaceModuleMap = getNamespaceModuleMap(moduleManager)
         val namespace = moduleManager.getNamespace()
         val filesUnderObservation = resourceManager.getFilesUnderObservation()
         val resourceIds = getResourceIds(filesUnderObservation)
+        val resourceIdFunctionNameMap = getResourceIdFunctionNameMap(resourceManager)
 
         println("\n***************** MIGRATION START *****************\n")
 
         val updatedSourceFiles = mutableListOf<SourceFileDetails>()
 
         sourceFiles.forEach { sourceFile ->
-            // Namespace found in import statements.
-            var currentNamespace = ""
-
             var currentResourceImportStatement: String? = null
-
-            // Flag to see if import is from any library.
-            var isLibraryResourceImport = false
 
             val changes = mutableListOf<Change>()
 
@@ -131,14 +145,11 @@ internal class MigrationManager(
                 val matchResultImport = importStatementRegex.find(line)
                 if (matchResultImport?.groups?.size == 2) {
                     currentResourceImportStatement = matchResultImport.groups[0]?.value.orEmpty()
-                    currentNamespace = matchResultImport.groups[1]?.value.orEmpty()
-                    isLibraryResourceImport = currentNamespace != namespace
                 }
 
-                // Check if it is resource access.
                 var matchResultResource: MatchResult? = null
 
-                // Iterate through replacement regex
+                // Check if it is resource access, iterate through replacement regex
                 for ((regex, resourcePath) in replacements) {
                     matchResultResource = regex.find(line)
                     if (matchResultResource == null) continue
@@ -146,43 +157,45 @@ internal class MigrationManager(
                     val moduleNamespace =
                         matchResultResource.groups[1]?.value.orEmpty() // 'com.example.mylibrary1.' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
                     val resourceId =
-                        matchResultResource.groups[2]?.value.orEmpty() // 'fun_title' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
+                        matchResultResource.groups[2]?.value.orEmpty() // 'fun_title' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)/getString(R.string.fun_title)
 
                     // If we don't have this resourceId in our set, simply skip this.
                     if (!resourceIds.contains(resourceId)) {
-                        fileContent.appendLine(line)
+                        matchResultResource = null
+                        log(sourceFile, index, false, "ResourceId not found in generated ResourceManager class.")
                         break
                     }
 
-                    // May need to append suffix if resources used in file are from a different module.
-                    var suffix = ""
-                    if (isLibraryResourceImport) {
-                        val moduleName = namespaceModuleMap[currentNamespace].orEmpty()
-                        suffix = if (moduleName.isNotEmpty()) "_$moduleName" else ""
+                    val completeResourceId = "R.${androidResMap[resourcePath]}.$resourceId"
+                    val functionNames = resourceIdFunctionNameMap[completeResourceId]
+                    if (functionNames == null) {
+                        matchResultResource = null
+                        log(sourceFile, index, false, "ResourceId not found in generated ResourceManager class.")
+                        break
                     }
 
-                    // If full qualified name is used for resource access need to append the suffix.
-                    if (moduleNamespace.isNotEmpty()) {
-                        val moduleName = namespaceModuleMap[moduleNamespace.dropLast(1)].orEmpty()
-                        suffix = if (moduleName.isNotEmpty()) "_$moduleName" else ""
+                    // TODO improve this so it handles situation when there are more than one function names for a given resourceId.
+                    if (functionNames.size > 1) {
+                        matchResultResource = null
+                        log(sourceFile, index, false, "More than one function names found for this ResourceId.")
+                        break
                     }
 
-                    val resourcemanagerStatement = "${resourcePath}${resourceId.toCamelCase()}"
+                    val resourceCallReplacementString = "ResourceManager.$resourcePath.${resourceIdFunctionNameMap[completeResourceId]?.first()}"
 
                     // Apply changes to fileContent based on group size.
                     when (matchResultResource.groups.size) {
                         // Group size will be 3 when there is no params passed to resource access code.
                         3 -> {
                             val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode = "${resourcemanagerStatement}$suffix()"
+                            val newResourceAccessCode = "$resourceCallReplacementString()"
 
-                            val newLine =
-                                line.replace(currentResourceAccessCode, newResourceAccessCode)
+                            val newLine = line.replace(currentResourceAccessCode, newResourceAccessCode)
                             fileContent.appendLine(newLine)
                             changes.add(
                                 Change(index, currentResourceAccessCode, newResourceAccessCode)
                             )
-                            logUpdatedLine(sourceFile, index)
+                            log(sourceFile, index)
                             break
                         }
 
@@ -190,16 +203,14 @@ internal class MigrationManager(
                         4 -> {
                             val param = matchResultResource.groups[3]?.value.orEmpty()
                             val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode =
-                                "${resourcemanagerStatement}$suffix($param)"
+                            val newResourceAccessCode = "$resourceCallReplacementString($param)"
 
-                            val newLine =
-                                line.replace(currentResourceAccessCode, newResourceAccessCode)
+                            val newLine = line.replace(currentResourceAccessCode, newResourceAccessCode)
                             fileContent.appendLine(newLine)
                             changes.add(
                                 Change(index, currentResourceAccessCode, newResourceAccessCode)
                             )
-                            logUpdatedLine(sourceFile, index)
+                            log(sourceFile, index)
                             break
                         }
 
@@ -208,8 +219,7 @@ internal class MigrationManager(
                             val param1 = matchResultResource.groups[3]?.value.orEmpty()
                             val param2 = matchResultResource.groups[4]?.value.orEmpty()
                             val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode =
-                                "${resourcemanagerStatement}$suffix($param1, $param2)"
+                            val newResourceAccessCode = "$resourceCallReplacementString($param1, $param2)"
 
                             val newLine =
                                 line.replace(currentResourceAccessCode, newResourceAccessCode)
@@ -217,7 +227,7 @@ internal class MigrationManager(
                             changes.add(
                                 Change(index, currentResourceAccessCode, newResourceAccessCode)
                             )
-                            logUpdatedLine(sourceFile, index)
+                            log(sourceFile, index)
                             break
                         }
 
@@ -270,7 +280,7 @@ internal class MigrationManager(
         val newImportStatement = "$currentResourceImportStatement\n$resourcemanagerImportStatement"
         contentToWrite = contentToWrite.replace(currentResourceImportStatement, newImportStatement)
         changes.add(Change(index, currentResourceImportStatement, newImportStatement))
-        logUpdatedLine(sourceFile, index)
+        log(sourceFile, index)
         return contentToWrite
     }
 
@@ -318,24 +328,58 @@ internal class MigrationManager(
     }
 
     /**
-     * Generates a mapping of namespaces to their corresponding module names.
+     * Generates a map associating resource IDs with the corresponding function names that operate on those resources.
      *
-     * @param moduleManager The [ModuleManager] instance representing the module for which the
-     *                      namespace-module map is being created.
-     * @return A map where keys are namespaces and values are module names. The current module's
-     *         namespace is mapped to an empty string, and dependencies' namespaces are mapped
-     *         to their respective names.
+     * @param resourceManager The [ResourceManager] instance providing access to project resources.
+     * @return A mutable map where keys are resource IDs (e.g., `R.string.resource_name`, `R.drawable.icon_name`)
+     *         and values are lists of function names associated with those resources.
      */
-    private fun getNamespaceModuleMap(moduleManager: ModuleManager): Map<String, String> {
-        val map = mutableMapOf<String, String>()
-        map[moduleManager.getNamespace().orEmpty()] = ""
-        moduleManager.getModuleDependencies().forEach { moduleName ->
-            val module = moduleDir.parentFile?.resolve(moduleName)
-            if (module != null) {
-                map[ModuleManager(module).getNamespace().orEmpty()] = module.name
+    private fun getResourceIdFunctionNameMap(resourceManager: ResourceManager): MutableMap<String, MutableList<String>> {
+        val resourceIdFunctionNameMap = mutableMapOf<String, MutableList<String>>()
+        val resourceMap = resourceManager.getResources().groupBy { it.type }
+        resourceMap.forEach { (resourceType, value) ->
+            when (resourceType) {
+                ResourceType.VALUES -> {
+                    processValueResources(value, resourceIdFunctionNameMap)
+                }
+
+                ResourceType.DRAWABLES -> {
+                    processDrawablesResources(value, resourceIdFunctionNameMap)
+                }
             }
         }
-        return map
+        return resourceIdFunctionNameMap
+    }
+
+    private fun processValueResources(
+        resources: List<Resource>,
+        resourceIdFunctionNameMap: MutableMap<String, MutableList<String>>
+    ) {
+        resources.forEach { resource ->
+            resource.moduleDetails.resDirectory.listFiles().getXmlFiles().forEach { file ->
+                val xmlResources = XmlParser.parseXML(file)
+                xmlResources.forEach {
+                    val resourceId = "R.${it.type.value}.${it.name}"
+                    val functionName = ClassFileGenerator.getValueResourceMethodName(it, resource.moduleDetails)
+                    resourceIdFunctionNameMap[resourceId] = resourceIdFunctionNameMap.getOrDefault(resourceId, mutableListOf())
+                    resourceIdFunctionNameMap[resourceId]?.add(functionName)
+                }
+            }
+        }
+    }
+
+    private fun processDrawablesResources(
+        resources: List<Resource>,
+        resourceIdFunctionNameMap: MutableMap<String, MutableList<String>>
+    ) {
+        resources.forEach { resource ->
+            resource.moduleDetails.resDirectory.listFiles()?.forEach { file ->
+                val resourceId = "R.drawable.${file.nameWithoutExtension}"
+                val functionName = ClassFileGenerator.getDrawableMethodName(file.nameWithoutExtension, resource.moduleDetails)
+                resourceIdFunctionNameMap[resourceId] = resourceIdFunctionNameMap.getOrDefault(resourceId, mutableListOf())
+                resourceIdFunctionNameMap[resourceId]?.add(functionName)
+            }
+        }
     }
 
     /**
@@ -368,10 +412,12 @@ internal class MigrationManager(
     /**
      * Logs the updated line in a source file.
      */
-    private fun logUpdatedLine(
+    private fun log(
         sourceFile: File,
-        lineNumber: Int
+        lineNumber: Int,
+        updated: Boolean = true,
+        details: String? = null
     ) {
-        println("Updated: ${sourceFile.absolutePath}:$lineNumber:")
+        println("${if (updated) "Updated" else "Skipped"}: ${sourceFile.absolutePath}:$lineNumber: ${details.orEmpty()}")
     }
 }

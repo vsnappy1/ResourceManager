@@ -11,6 +11,6 @@ class MyApplication: Application() {
         ResourceManager.initialize(this)
 
         ResourceManager.Strings.stringRes()
-        ResourceManager.Strings.stringRes_module()
+        ResourceManager.Strings.stringResMod_module()
     }
 }

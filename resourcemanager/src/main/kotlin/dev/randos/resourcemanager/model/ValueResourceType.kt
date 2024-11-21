@@ -3,24 +3,24 @@ package dev.randos.resourcemanager.model
 /**
  * Sealed class representing various types of value resources in an android application.
  */
-internal sealed class ValueResourceType {
-    object String : ValueResourceType()
+internal sealed class ValueResourceType(val value: kotlin.String) {
+    object String : ValueResourceType("string")
 
-    object Color : ValueResourceType()
+    object Color : ValueResourceType("color")
 
-    object Boolean : ValueResourceType()
+    object Boolean : ValueResourceType("bool")
 
-    object Integer : ValueResourceType()
+    object Integer : ValueResourceType("integer")
 
-    object Dimension : ValueResourceType()
+    object Dimension : ValueResourceType("dimen")
 
-    object Fraction : ValueResourceType()
+    object Fraction : ValueResourceType("fraction")
 
-    object Array : ValueResourceType()
+    object Array : ValueResourceType("array")
 
-    object StringArray : ValueResourceType()
+    object StringArray : ValueResourceType("array")
 
-    object IntArray : ValueResourceType()
+    object IntArray : ValueResourceType("array")
 
-    object Plural : ValueResourceType()
+    object Plural : ValueResourceType("plurals")
 }

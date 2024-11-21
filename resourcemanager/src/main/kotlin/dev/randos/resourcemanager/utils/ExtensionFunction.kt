@@ -1,5 +1,7 @@
 package dev.randos.resourcemanager.utils
 
+import java.io.File
+
 // Function to convert snake_case to camelCase
 internal fun String.toCamelCase(): String {
     return split('_') // Split by underscores
@@ -11,4 +13,8 @@ internal fun String.toCamelCase(): String {
             }
         }
         .joinToString("") // Join the words back together without spaces
+}
+
+internal fun Array<File>?.getXmlFiles(): List<File> {
+    return this?.filter { it.extension == "xml" } ?: emptyList()
 }

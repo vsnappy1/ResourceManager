@@ -1,0 +1,32 @@
+<resources>
+    <string name="string_res_mod">My Application</string>
+    <string name="string_parameterized_res_mod">Hello %s</string>
+    <bool name="bool_res_mod">false</bool>
+    <color name="color_res_mod">#FF000000</color>
+    <dimen name="dimen_res_mod">20dp</dimen>
+    <fraction name="fraction_res_mod">0.3</fraction>
+    <integer name="integer_res">10</integer>
+    <string-array name="string_array_res_mod">
+        <item>USA</item>
+        <item>UK</item>
+        <item>Canada</item>
+    </string-array>
+    <array name="array_res_mod">
+        <item>#FF3700B3</item>
+        <item>#FF03DAC5</item>
+        <item>#FF018786</item>
+    </array>
+    <integer-array name="int_array_res_mod">
+        <item>23</item>
+        <item>30</item>
+        <item>40</item>
+    </integer-array>
+    <plurals name="plurals_res_mod" translatable="false">
+        <item quantity="zero">Empty</item>
+        <item quantity="one">There is one item</item>
+        <item quantity="two">There is two item</item>
+        <item quantity="few">There is few item</item>
+        <item quantity="many">There is many item</item>
+        <item quantity="other">There are %d items</item>
+    </plurals>
+</resources>

@@ -10,6 +10,6 @@ class MyApplication: Application() {
         ResourceManager.initialize(this)
 
         getString(com.example.app.R.string.string_res)
-        getString(R.string.string_res)
+        getString(R.string.string_res_mod)
     }
 }

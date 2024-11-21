@@ -6,8 +6,8 @@ import dev.randos.resourcemanager.model.Resource
 import dev.randos.resourcemanager.model.ResourceType
 import dev.randos.resourcemanager.model.ValueResource
 import dev.randos.resourcemanager.model.ValueResourceType
+import dev.randos.resourcemanager.utils.getXmlFiles
 import dev.randos.resourcemanager.utils.toCamelCase
-import java.io.File
 
 internal object ClassFileGenerator {
     fun generateClassFile(
@@ -178,9 +178,9 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val moduleNameString = getModuleNameString(moduleDetails)
+        val moduleNameString = getDrawableMethodName(name, moduleDetails)
         appendLine(
-            "$defaultIndentation@JvmOverloads @JvmStatic fun ${name.toCamelCase()}$moduleNameString(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleNameString(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
         )
     }
 
@@ -190,7 +190,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : Float = application.resources.getDimension(${namespaceString}R.dimen.${resource.name})"
         )
@@ -202,7 +202,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(theme: Theme = application.theme) : Int = application.resources.getColor(${namespaceString}R.color.${resource.name}, theme)"
         )
@@ -214,7 +214,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : Int = application.resources.getInteger(${namespaceString}R.integer.${resource.name})"
         )
@@ -226,7 +226,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : Boolean = application.resources.getBoolean(${namespaceString}R.bool.${resource.name})"
         )
@@ -238,7 +238,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(${namespaceString}R.fraction.${resource.name}, base, pbase)"
         )
@@ -250,7 +250,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
         )
@@ -262,7 +262,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(${namespaceString}R.plurals.${resource.name}, quantity, args)"
         )
@@ -274,7 +274,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : kotlin.Array<String> = application.resources.getStringArray(${namespaceString}R.array.${resource.name})"
         )
@@ -286,7 +286,7 @@ internal object ClassFileGenerator {
         moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val methodName = getMethodName(resource, moduleDetails)
+        val methodName = getValueResourceMethodName(resource, moduleDetails)
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : IntArray = application.resources.getIntArray(${namespaceString}R.array.${resource.name})"
         )
@@ -298,12 +298,26 @@ internal object ClassFileGenerator {
      *
      * @return A string representing the generated method name in camel case format.
      */
-    private fun getMethodName(
+    fun getValueResourceMethodName(
         resource: ValueResource,
         moduleDetails: ModuleDetails
     ): String {
         val moduleNameString = getModuleNameString(moduleDetails)
         return "${resource.name.toCamelCase()}$moduleNameString"
+    }
+
+    /**
+     * Generates a method name based on the provided drawable resource nameWithoutExtension and module details.
+     * Combines the resource nameWithoutExtension in camel case with the module name if it exists.
+     *
+     * @return A string representing the generated method name in camel case format.
+     */
+    fun getDrawableMethodName(
+        name: String,
+        moduleDetails: ModuleDetails
+    ): String {
+        val moduleNameString = getModuleNameString(moduleDetails)
+        return "${name.toCamelCase()}$moduleNameString"
     }
 
     /**
@@ -325,8 +339,4 @@ internal object ClassFileGenerator {
      */
     private fun getNamespace(moduleDetails: ModuleDetails) =
         if (moduleDetails.namespace.isNotEmpty()) "${moduleDetails.namespace}." else ""
-}
-
-private fun Array<File>?.getXmlFiles(): List<File> {
-    return this?.filter { it.extension == "xml" } ?: emptyList()
 }
