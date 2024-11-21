@@ -61,13 +61,15 @@ internal object ClassFileGenerator {
         }
 
     private fun StringBuilder.generateObjectForDrawableResources(resources: List<Resource>) {
+        val functionNames = mutableSetOf<String>()
         appendLine("\tobject Drawables {")
         resources.forEach { resource ->
             resource.moduleDetails.resDirectory.listFiles()?.sorted()?.forEach { file ->
                 appendDrawableResource(
                     name = file.nameWithoutExtension,
                     defaultIndentation = "\t\t",
-                    moduleDetails = resource.moduleDetails
+                    moduleDetails = resource.moduleDetails,
+                    functionNames
                 )
             }
         }
@@ -175,13 +177,20 @@ internal object ClassFileGenerator {
     private fun StringBuilder.appendDrawableResource(
         name: String,
         defaultIndentation: String,
-        moduleDetails: ModuleDetails
+        moduleDetails: ModuleDetails,
+        functionNames: MutableSet<String>
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val moduleNameString = getDrawableMethodName(name, moduleDetails)
-        appendLine(
-            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleNameString(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
-        )
+        /*
+          This ensures there are only unique function names in the generated ResourceManager to avoid
+          conflicting overloads issue.
+         */
+        if (functionNames.add(moduleNameString)) {
+            appendLine(
+                "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleNameString(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
+            )
+        }
     }
 
     private fun StringBuilder.appendDimensionResource(

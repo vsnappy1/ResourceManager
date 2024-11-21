@@ -12,7 +12,7 @@ plugins {
     id("com.android.application") version "8.0.1" apply false
     id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id("dev.randos.resourcemanager") version "0.0.4" apply false    // Add this line for ResourceManager support
+    id("dev.randos.resourcemanager") version "0.0.5" apply false    // Add this line for ResourceManager support
 }
 ```
 Or
@@ -21,7 +21,7 @@ buildScripts {
     ...
     dependencies {
         ...
-        classpath 'dev.randos:resourcemanager:0.0.4'    // Add this line for ResourceManager support
+        classpath 'dev.randos:resourcemanager:0.0.5'    // Add this line for ResourceManager support
     }
 }
 ```
