@@ -3,6 +3,7 @@ package dev.randos.resourcemanager.file.parser
 import dev.randos.resourcemanager.model.ValueResource
 import dev.randos.resourcemanager.model.ValueResourceType
 import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -83,7 +84,15 @@ internal object XmlParser {
                 resources.add(ValueResource(attributeName, ValueResourceType.Fraction))
             }
 
-            STRING_ARRAY_TAG, ARRAY_TAG -> {
+            ARRAY_TAG -> {
+                if (isIntArray(node.getElementsByTagName("item"))) {
+                    resources.add(ValueResource(attributeName, ValueResourceType.IntArray))
+                } else {
+                    resources.add(ValueResource(attributeName, ValueResourceType.StringArray))
+                }
+            }
+
+            STRING_ARRAY_TAG -> {
                 resources.add(ValueResource(attributeName, ValueResourceType.StringArray))
             }
 
@@ -95,5 +104,31 @@ internal object XmlParser {
                 resources.add(ValueResource(attributeName, ValueResourceType.Plural))
             }
         }
+    }
+
+    private fun isIntArray(items: NodeList): Boolean {
+        var isIntArray = true
+
+        for (i in 0 until items.length) {
+            val itemNode = items.item(i)
+            val value = itemNode.textContent.trim()
+
+            // Check if the value is an integer
+            if (!value.isInt() && !value.isColorHex()) {
+                isIntArray = false
+                break
+            }
+        }
+        return isIntArray
+    }
+
+    // Extension function to check if a value is an integer
+    private fun String.isInt(): Boolean {
+        return this.toIntOrNull() != null
+    }
+
+    // Extension function to check if a value is a valid color hex code
+    private fun String.isColorHex(): Boolean {
+        return this.matches(Regex("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$"))
     }
 }

@@ -97,7 +97,7 @@ class XmlParserTest {
         assertTrue(map["fraction_res"]?.first()?.type is ValueResourceType.Fraction)
         assertTrue(map["integer_res"]?.first()?.type is ValueResourceType.Integer)
         assertTrue(map["string_array_res"]?.first()?.type is ValueResourceType.StringArray)
-        assertTrue(map["array_res"]?.first()?.type is ValueResourceType.StringArray)
+        assertTrue(map["array_res"]?.first()?.type is ValueResourceType.IntArray)
         assertTrue(map["int_array_res"]?.first()?.type is ValueResourceType.IntArray)
         assertTrue(map["plurals_res"]?.first()?.type is ValueResourceType.Plural)
         assertEquals(11, valueResources.size)

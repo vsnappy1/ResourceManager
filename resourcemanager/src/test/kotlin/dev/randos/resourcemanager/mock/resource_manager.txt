@@ -42,6 +42,8 @@ object ResourceManager {
 	}
 
 	object IntArrays {
+		@JvmStatic fun arrayRes() : IntArray = application.resources.getIntArray(R.array.array_res)
+		@JvmStatic fun arrayRes_lib1() : IntArray = application.resources.getIntArray(com.example.lib1.R.array.array_res)
 		@JvmStatic fun intArrayRes() : IntArray = application.resources.getIntArray(R.array.int_array_res)
 		@JvmStatic fun intArrayRes_lib1() : IntArray = application.resources.getIntArray(com.example.lib1.R.array.int_array_res)
 	}
@@ -64,8 +66,6 @@ object ResourceManager {
 	}
 
 	object StringArrays {
-		@JvmStatic fun arrayRes() : kotlin.Array<String> = application.resources.getStringArray(R.array.array_res)
-		@JvmStatic fun arrayRes_lib1() : kotlin.Array<String> = application.resources.getStringArray(com.example.lib1.R.array.array_res)
 		@JvmStatic fun stringArrayRes() : kotlin.Array<String> = application.resources.getStringArray(R.array.string_array_res)
 		@JvmStatic fun stringArrayRes_lib1() : kotlin.Array<String> = application.resources.getStringArray(com.example.lib1.R.array.string_array_res)
 	}
