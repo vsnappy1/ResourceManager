@@ -45,13 +45,15 @@ internal class ResourceManager(
             )
         )
 
-        // Locate the "drawable" directory within the "res" directory.
-        list.add(
-            Resource(
-                type = ResourceType.DRAWABLES,
-                moduleDetails = ModuleDetails(resDirectory = File(resFile, "drawable"))
+        // Locate all "drawable" directory within the "res" directory.
+        resFile.listFiles()?.filter { it.isDirectory && it.name.startsWith("drawable") }?.forEach { drawableDirectory ->
+            list.add(
+                Resource(
+                    type = ResourceType.DRAWABLES,
+                    moduleDetails = ModuleDetails(resDirectory = File(resFile, drawableDirectory.name))
+                )
             )
-        )
+        }
 
         /*
          Also add resources for project dependencies. (i.e. implementation(project(":my_library")))
@@ -69,13 +71,15 @@ internal class ResourceManager(
                     )
                 )
 
-                // Locate the "drawable" directory within the "res" directory.
-                list.add(
-                    Resource(
-                        type = ResourceType.DRAWABLES,
-                        moduleDetails = ModuleDetails(module, namespace, File(resFile, "drawable"))
+                // Locate all "drawable" directory within the "res" directory.
+                resFile.listFiles()?.filter { it.isDirectory && it.name.startsWith("drawable") }?.forEach { drawableDirectory ->
+                    list.add(
+                        Resource(
+                            type = ResourceType.DRAWABLES,
+                            moduleDetails = ModuleDetails(module, namespace, File(resFile, "drawable"))
+                        )
                     )
-                )
+                }
             }
         }
         return list
