@@ -66,11 +66,10 @@ class ClassFileGeneratorTest {
         val gradleFile = File(moduleDir, "build.gradle.kts")
         gradleFile.writeText(gradleFileContent)
 
-        val resourceContent = MockFileReader.read("all_resources.txt")
         val colorResContent = getColorResourceFileContent()
 
         File(valueResDirectory, "resources.xml").also {
-            it.writeText(resourceContent)
+            it.writeText(MockFileReader.read("all_resources.txt"))
         }
 
         File(valueResDirectory, "colors.xml").also {
@@ -78,7 +77,7 @@ class ClassFileGeneratorTest {
         }
 
         File(valueResDirectoryLib1, "resources.xml").also {
-            it.writeText(resourceContent)
+            it.writeText(MockFileReader.read("all_resources_module.txt"))
         }
 
         File(valueResDirectoryLib2, "colors.xml").also {

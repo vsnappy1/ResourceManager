@@ -13,7 +13,7 @@ apply(from = "../gradle/jacoco.gradle.kts")
 
 val agp: String by project
 val pluginGroup = "dev.randos"
-val pluginVersion = "0.0.5"
+val pluginVersion = "0.0.6"
 val pluginName = "resourcemanager"
 
 dependencies {
@@ -29,15 +29,15 @@ group = pluginGroup
 version = pluginVersion
 
 gradlePlugin {
-    website.set("https://github.com/vsnappy1/ResourceManager")
-    vcsUrl.set("https://github.com/vsnappy1/ResourceManager")
+    website.set("https://github.com/vsnappy1/resourcemanager")
+    vcsUrl.set("https://github.com/vsnappy1/resourcemanager")
     plugins {
         create("resourcemanager") {
             id = "dev.randos.resourcemanager"
             implementationClass = "ResourceManagerPlugin"
             displayName = "Resource Manager"
             description = "ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code."
-            tags.set(listOf("android", "androidResources", "codeGeneration"))
+            tags.set(listOf("Android", "Android Resources", "Code Generation"))
         }
     }
 }

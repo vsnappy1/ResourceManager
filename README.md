@@ -1,45 +1,50 @@
 # ResourceManager
 ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code.
 
+[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v?label=Gradle%20Plugin%20Portal&metadataUrl=https%3A%2F%2Fplugins.gradle.org%2Fm2%2Fdev%2Frandos%2Fresourcemanager%2Fdev.randos.resourcemanager.gradle.plugin%2Fmaven-metadata.xml)](https://plugins.gradle.org/plugin/dev.randos.resourcemanager)
 ![Platform Support](https://img.shields.io/badge/platform-Android-brightgreen.svg)
 
 ## Setup
 
 ### Step 1: Add ResourceManager Plugin
-Add the resourcemanager plugin to your project's (root) __build.gradle__.
+Add resourcemanager plugin to your project's root __build.gradle(.kts)__ file.
+- If your project uses the plugins block.
 ```kotlin
 plugins {
     id("com.android.application") version "8.0.1" apply false
     id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id("dev.randos.resourcemanager") version "0.0.5" apply false    // Add this line for ResourceManager support
+    id("dev.randos.resourcemanager") version "0.0.6" apply false    // Add ResourceManager plugin
 }
 ```
-Or
+- If your project uses the buildscript block.
 ```kotlin
 buildScripts {
     ...
     dependencies {
+        classpath "com.android.tools.build:gradle:8.0.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21"
         ...
-        classpath 'dev.randos:resourcemanager:0.0.5'    // Add this line for ResourceManager support
+        classpath 'dev.randos:resourcemanager:0.0.6'    // Add ResourceManager plugin
     }
 }
 ```
 
 ### Step 2: Apply ResourceManager Plugin
-Apply ResourceManager plugin in your module-level __build.gradle__.
+Apply the ResourceManager plugin in your module-level __build.gradle(.kts)__ file.
+- If you are using the plugins block, add the following:
 ```kotlin
 plugins {
     id("com.android.application")
     ...
-    id("dev.randos.resourcemanager")    // Apply ResourceManager
+    id("dev.randos.resourcemanager")    // Apply ResourceManager plugin
 }
 ```
-Or
+- If your project uses the apply statement, include this:
 ```kotlin
 apply plugin: 'com.android.application'
 ...
-apply plugin: 'dev.randos.resourcemanager'    // Apply ResourceManager
+apply plugin: 'dev.randos.resourcemanager'    // Apply ResourceManager plugin
 ```
 
 ### Step 3: Initialize ResourceManager

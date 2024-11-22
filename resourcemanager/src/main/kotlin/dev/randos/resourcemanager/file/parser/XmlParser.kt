@@ -114,7 +114,7 @@ internal object XmlParser {
             val value = itemNode.textContent.trim()
 
             // Check if the value is an integer
-            if (!value.isInt() && !value.isColorHex()) {
+            if (!value.isInt() && !value.isColorHex() && !value.isColorReference() && !value.isIntegerReference()) {
                 isIntArray = false
                 break
             }
@@ -130,5 +130,13 @@ internal object XmlParser {
     // Extension function to check if a value is a valid color hex code
     private fun String.isColorHex(): Boolean {
         return this.matches(Regex("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$"))
+    }
+
+    private fun String.isColorReference(): Boolean {
+        return this.startsWith("@color/")
+    }
+
+    private fun String.isIntegerReference(): Boolean {
+        return this.startsWith("@integer/")
     }
 }

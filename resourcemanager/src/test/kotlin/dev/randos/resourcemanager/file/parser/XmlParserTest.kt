@@ -1,6 +1,7 @@
 package dev.randos.resourcemanager.file.parser
 
 import dev.randos.resourcemanager.model.ValueResourceType
+import dev.randos.resourcemanager.utils.MockFileReader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -41,42 +42,7 @@ class XmlParserTest {
     @Test
     fun parseXML_whenFileContainsNDifferentTypeValueResources_shouldReturnNValueResources() {
         // Given
-        val resourceFileContent =
-            """
-            <resources>
-                <string name="string_res">My Application</string>
-                <string name="string_parameterized_res">Hello %s</string>
-                <bool name="bool_res">false</bool>
-                <color name="color_res">#FF000000</color>
-                <dimen name="dimen_res">20dp</dimen>
-                <fraction name="fraction_res">0.3</fraction>
-                <integer name="integer_res">10</integer>
-                <string-array name="string_array_res">
-                    <item>USA</item>
-                    <item>UK</item>
-                    <item>Canada</item>
-                </string-array>
-                <array name="array_res">
-                    <item>#FF3700B3</item>
-                    <item>#FF03DAC5</item>
-                    <item>#FF018786</item>
-                </array>
-                <integer-array name="int_array_res">
-                    <item>23</item>
-                    <item>30</item>
-                    <item>40</item>
-                </integer-array>
-                <plurals name="plurals_res" translatable="false">
-                    <item quantity="zero">Empty</item>
-                    <item quantity="one">There is one item</item>
-                    <item quantity="two">There is two item</item>
-                    <item quantity="few">There is few item</item>
-                    <item quantity="many">There is many item</item>
-                    <item quantity="other">There are %d items</item>
-                </plurals>
-            </resources>
-            """.trimIndent()
-
+        val resourceFileContent = MockFileReader.read("all_resources.txt")
         val moduleDirectory = Files.createTempDirectory("app").toFile()
         val resourceFile =
             File(moduleDirectory, "src/main/res/values/strings.xml").also {
@@ -98,8 +64,11 @@ class XmlParserTest {
         assertTrue(map["integer_res"]?.first()?.type is ValueResourceType.Integer)
         assertTrue(map["string_array_res"]?.first()?.type is ValueResourceType.StringArray)
         assertTrue(map["array_res"]?.first()?.type is ValueResourceType.IntArray)
+        assertTrue(map["array_color"]?.first()?.type is ValueResourceType.IntArray)
+        assertTrue(map["array_int"]?.first()?.type is ValueResourceType.IntArray)
+        assertTrue(map["array_mixed"]?.first()?.type is ValueResourceType.StringArray)
         assertTrue(map["int_array_res"]?.first()?.type is ValueResourceType.IntArray)
         assertTrue(map["plurals_res"]?.first()?.type is ValueResourceType.Plural)
-        assertEquals(11, valueResources.size)
+        assertEquals(14, valueResources.size)
     }
 }

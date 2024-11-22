@@ -16,6 +16,17 @@
         <item>#FF03DAC5</item>
         <item>#FF018786</item>
     </array>
+    <array name="array_color">
+        <item>@color/cardview_dark_background</item>
+    </array>
+    <array name="array_int">
+        <item>@integer/integer_res</item>
+    </array>
+    <array name="array_mixed">
+        <item>#FF3700B3</item>
+        <item>1</item>
+        <item>abc</item>
+    </array>
     <integer-array name="int_array_res">
         <item>23</item>
         <item>30</item>
