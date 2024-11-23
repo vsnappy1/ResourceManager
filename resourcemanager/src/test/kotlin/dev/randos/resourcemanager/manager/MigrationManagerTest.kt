@@ -87,6 +87,24 @@ class MigrationManagerTest {
     }
 
     @Test
+    fun run_whenMigrationTaskRunMultipleTimes_shouldUpdateGivenFileAccordinglyAndResultShouldNotChange() {
+        // Given
+        val sourceDirs = File(app, "src/main/kotlin/com/example/app")
+        sourceDirs.mkdirs()
+        val sourceFile = File(sourceDirs, "MainActivity.kt")
+        sourceFile.writeText(MockFileReader.read("main_activity_kt_before_migration.txt"))
+
+        // When
+        migrationManager.migrate()
+        migrationManager.migrate()
+        migrationManager.migrate()
+
+        // Then
+        val expectedResult = MockFileReader.read("main_activity_kt_after_migration.txt")
+        assertEquals(expectedResult, sourceFile.readText())
+    }
+
+    @Test
     fun run_whenSourceFileHaveResourceImportStatementFromModule_shouldUpdateFileAccordingly() {
         // Given
         val sourceDirs = File(app, "src/main/kotlin/com/example/app")

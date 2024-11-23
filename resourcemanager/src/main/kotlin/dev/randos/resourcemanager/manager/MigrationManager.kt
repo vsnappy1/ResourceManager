@@ -57,7 +57,9 @@ internal class MigrationManager(
             getOneParamRegex("getDrawable", "drawable") to "Drawables",
             getOneParamRegex("getQuantityString", "plurals") to "Plurals",
             getOneParamRegex("getString", "string") to "Strings",
-            getTwoParamRegex("getFraction", "fraction") to "Fractions"
+            getTwoParamRegex("getFraction", "fraction") to "Fractions",
+            getContextCompatRegex("getDrawable", "drawable") to "Drawables",
+            getContextCompatRegex("getColor", "color") to "Colors"
         )
     }
 
@@ -79,6 +81,19 @@ internal class MigrationManager(
         )
 
     /**
+     * Constructs a regex pattern to match resource retrieval methods which uses ContextCompact.
+     *
+     * Example match:
+     * - `ContextCompat.getDrawable(baseContext, R.drawable.ic_repeat)`
+     */
+    private fun getContextCompatRegex(
+        methodName: String,
+        resourceType: String
+    ): Regex {
+        return Regex("(?:ContextCompat|AppCompatResources).${methodName}\\(\\s*(\\w+)\\s*,\\s*R\\.${resourceType}\\.(\\w+)\\s*\\)")
+    }
+
+    /**
      * Constructs a regex pattern to match resource retrieval methods with no additional parameter.
      *
      * Example match:
@@ -88,7 +103,7 @@ internal class MigrationManager(
         methodName: String,
         resourceType: String
     ): Regex {
-        return Regex("${common}${methodName}\\(\\s*(.+)?R\\.${resourceType}\\.(\\w+)\\s*\\)")
+        return Regex("${common}${methodName}\\(\\s*([\\w.]+)?R\\.${resourceType}\\.(\\w+)\\s*\\)")
     }
 
     /**
@@ -101,7 +116,7 @@ internal class MigrationManager(
         methodName: String,
         resourceType: String
     ): Regex {
-        return Regex("${common}${methodName}\\(\\s*(.+)?R\\.${resourceType}\\.(\\w+),\\s*(.+)\\s*\\)")
+        return Regex("${common}${methodName}\\(\\s*([\\w.]+)?R\\.${resourceType}\\.(\\w+),\\s*(.+)\\s*\\)")
     }
 
     /**
@@ -114,7 +129,7 @@ internal class MigrationManager(
         methodName: String,
         resourceType: String
     ): Regex {
-        return Regex("${common}${methodName}\\(\\s*(.+)?R\\.${resourceType}\\.(\\w+),\\s*(.+)\\s*,\\s*(.+)\\s*\\)")
+        return Regex("${common}${methodName}\\(\\s*([\\w.]+)?R\\.${resourceType}\\.(\\w+),\\s*(.+)\\s*,\\s*(.+)\\s*\\)")
     }
 
     fun migrate() {
@@ -133,6 +148,7 @@ internal class MigrationManager(
 
         sourceFiles.forEach { sourceFile ->
             var currentResourceImportStatement: String? = null
+            var currentResourceImportStatementIndex = 0
 
             val changes = mutableListOf<Change>()
 
@@ -145,109 +161,89 @@ internal class MigrationManager(
                 val matchResultImport = importStatementRegex.find(line)
                 if (matchResultImport?.groups?.size == 2) {
                     currentResourceImportStatement = matchResultImport.groups[0]?.value.orEmpty()
+                    currentResourceImportStatementIndex = index
                 }
 
-                var matchResultResource: MatchResult? = null
+                var matchResultResources: Sequence<MatchResult>
+                var lineToAppend = line
 
                 // Check if it is resource access, iterate through replacement regex
                 for ((regex, resourcePath) in replacements) {
-                    matchResultResource = regex.find(line)
-                    if (matchResultResource == null) continue
+                    matchResultResources = regex.findAll(lineToAppend)
 
-                    val moduleNamespace =
-                        matchResultResource.groups[1]?.value.orEmpty() // 'com.example.mylibrary1.' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
-                    val resourceId =
-                        matchResultResource.groups[2]?.value.orEmpty() // 'fun_title' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)/getString(R.string.fun_title)
+                    for (matchResultResource in matchResultResources) {
+                        val moduleNamespace =
+                            matchResultResource.groups[1]?.value.orEmpty() // 'com.example.mylibrary1.' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)
+                        val resourceId =
+                            matchResultResource.groups[2]?.value.orEmpty() // 'fun_title' in case of ->  getString(com.example.mylibrary1.R.string.fun_title)/getString(R.string.fun_title)
 
-                    // If we don't have this resourceId in our set, simply skip this.
-                    if (!resourceIds.contains(resourceId)) {
-                        matchResultResource = null
-                        log(sourceFile, index, false, "ResourceId not found in generated ResourceManager class.")
-                        break
-                    }
-
-                    val completeResourceId = "R.${androidResMap[resourcePath]}.$resourceId"
-                    val functionNames = resourceIdFunctionNameMap[completeResourceId]
-                    if (functionNames == null) {
-                        matchResultResource = null
-                        log(sourceFile, index, false, "ResourceId not found in generated ResourceManager class.")
-                        break
-                    }
-
-                    // TODO improve this so it handles situation when there are more than one function names for a given resourceId.
-                    if (functionNames.size > 1) {
-                        matchResultResource = null
-                        log(sourceFile, index, false, "More than one function names found for this ResourceId.")
-                        break
-                    }
-
-                    val resourceCallReplacementString = "ResourceManager.$resourcePath.${resourceIdFunctionNameMap[completeResourceId]?.first()}"
-
-                    // Apply changes to fileContent based on group size.
-                    when (matchResultResource.groups.size) {
-                        // Group size will be 3 when there is no params passed to resource access code.
-                        3 -> {
-                            val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode = "$resourceCallReplacementString()"
-
-                            val newLine = line.replace(currentResourceAccessCode, newResourceAccessCode)
-                            fileContent.appendLine(newLine)
-                            changes.add(
-                                Change(index, currentResourceAccessCode, newResourceAccessCode)
-                            )
-                            log(sourceFile, index)
+                        // If we don't have this resourceId in our set, simply skip this.
+                        if (!resourceIds.contains(resourceId)) {
+                            log(sourceFile, index, false, "ResourceId not found in generated ResourceManager class.")
                             break
                         }
 
-                        // Group size will be 4 when there is one params passed to resource access code.
-                        4 -> {
-                            val param = matchResultResource.groups[3]?.value.orEmpty()
-                            val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode = "$resourceCallReplacementString($param)"
-
-                            val newLine = line.replace(currentResourceAccessCode, newResourceAccessCode)
-                            fileContent.appendLine(newLine)
-                            changes.add(
-                                Change(index, currentResourceAccessCode, newResourceAccessCode)
-                            )
-                            log(sourceFile, index)
+                        val completeResourceId = "R.${androidResMap[resourcePath]}.$resourceId"
+                        val functionNames = resourceIdFunctionNameMap[completeResourceId]
+                        if (functionNames == null) {
+                            log(sourceFile, index, false, "ResourceId not found in generated ResourceManager class.")
                             break
                         }
 
-                        // Group size will be 5 when there is two params passed to resource access code.
-                        5 -> {
-                            val param1 = matchResultResource.groups[3]?.value.orEmpty()
-                            val param2 = matchResultResource.groups[4]?.value.orEmpty()
-                            val currentResourceAccessCode = matchResultResource.value
-                            val newResourceAccessCode = "$resourceCallReplacementString($param1, $param2)"
-
-                            val newLine =
-                                line.replace(currentResourceAccessCode, newResourceAccessCode)
-                            fileContent.appendLine(newLine)
-                            changes.add(
-                                Change(index, currentResourceAccessCode, newResourceAccessCode)
-                            )
-                            log(sourceFile, index)
+                        // TODO improve this so it handles situation when there are more than one function names for a given resourceId.
+                        if (functionNames.size > 1) {
+                            log(sourceFile, index, false, "More than one function names found for this ResourceId.")
                             break
                         }
 
-                        else -> {
-                            matchResultResource = null
+                        val resourceCallReplacementString = "ResourceManager.$resourcePath.${resourceIdFunctionNameMap[completeResourceId]?.first()}"
+
+                        var currentResourceAccessCode: String
+                        var newResourceAccessCode: String
+                        // Apply changes to fileContent based on group size.
+                        when (matchResultResource.groups.size) {
+                            // Group size will be 2 when ContextCompat is used to access resource.
+                            2 -> {
+                                currentResourceAccessCode = matchResultResource.value
+                                newResourceAccessCode = "$resourceCallReplacementString()"
+                            }
+
+                            // Group size will be 3 when there is no params passed to resource access code.
+                            3 -> {
+                                currentResourceAccessCode = matchResultResource.value
+                                newResourceAccessCode = "$resourceCallReplacementString()"
+                            }
+
+                            // Group size will be 4 when there is one param passed to resource access code.
+                            4 -> {
+                                val param = matchResultResource.groups[3]?.value.orEmpty()
+                                currentResourceAccessCode = matchResultResource.value
+                                newResourceAccessCode = "$resourceCallReplacementString($param)"
+                            }
+
+                            // Group size will be 5 when there is two params passed to resource access code.
+                            5 -> {
+                                val param1 = matchResultResource.groups[3]?.value.orEmpty()
+                                val param2 = matchResultResource.groups[4]?.value.orEmpty()
+                                currentResourceAccessCode = matchResultResource.value
+                                newResourceAccessCode = "$resourceCallReplacementString($param1, $param2)"
+                            }
+
+                            else -> {
+                                continue
+                            }
                         }
+                        lineToAppend = lineToAppend.replace(currentResourceAccessCode, newResourceAccessCode)
+                        changes.add(Change(index, currentResourceAccessCode, newResourceAccessCode))
+                        log(sourceFile, index)
                     }
                 }
-
-                // Skip this line if already processed by matchResultResource.
-                if (matchResultResource != null) {
-                    continue
-                }
-
-                fileContent.appendLine(line)
+                fileContent.appendLine(lineToAppend)
             }
 
             // If some changes are done to the file content rewrite the file content.
             if (changes.isNotEmpty()) {
-                val contentToWrite = getContentToWrite(fileContent, sourceFile, namespace, currentResourceImportStatement, changes, index)
+                val contentToWrite = getContentToWrite(fileContent, sourceFile, namespace, currentResourceImportStatement, changes, currentResourceImportStatementIndex)
                 sourceFile.writeText(contentToWrite)
                 updatedSourceFiles.add(
                     SourceFileDetails(sourceFile.name, sourceFile.absolutePath, changes)

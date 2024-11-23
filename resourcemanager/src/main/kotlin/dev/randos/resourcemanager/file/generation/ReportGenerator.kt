@@ -97,7 +97,7 @@ internal object ReportGenerator {
                 appendLine(5, "<th style=\"width: 35%;\">Updated Code</th>")
                 appendLine(4, "</tr>")
 
-                for (change in file.changes) {
+                for (change in file.changes.sortedBy { it.lineNumber }) {
                     appendLine(4, "<tr>")
                     appendLine(5, "<td class=\"line-number\">${change.lineNumber}</td>")
                     appendLine(5, "<td class=\"current\">${change.current.escapeHtml()}</td>")

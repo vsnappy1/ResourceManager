@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import com.example.app.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,5 +56,8 @@ class MainActivity : AppCompatActivity() {
         // We have same id (integer_res) in both app and module package (Skipped).
         val integer = resources.getInteger(R.integer.integer_res)
         val quantity = resources.getQuantityString(R.plurals.plurals_res, 0)
+        val name1 = if(true) jkl().getString(R.string.string_parameterized_res, "Kumar") else baseContext.resources.getString(R.string.string_res)
+        val name2 = if(true) getString(R.string.string_parameterized_res) else baseContext.resources.getString(R.string.string_res)
+        val name3 = if(true) jkl().aa.getString(com.example.mylibrary1.R.string.string_parameterized_res_mod) else baseContext.resources.getString(R.string.string_res)
     }
 }
