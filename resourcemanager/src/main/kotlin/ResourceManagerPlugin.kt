@@ -4,6 +4,10 @@ import dev.randos.resourcemanager.manager.ModuleManager
 import dev.randos.resourcemanager.manager.ResourceManager
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KaptGenerateStubs
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import task.ResourceManagerMigrationTask
 import java.io.File
 
@@ -38,10 +42,19 @@ class ResourceManagerPlugin : Plugin<Project> {
             }
 
         // Ensure that the "generateResourceManager" task runs before any compile task.
-        project.tasks.matching { it.name.startsWith("compile") }
-            .configureEach {
+        project.tasks.withType<KotlinCompile>().configureEach {
+            dependsOn(generateResourceManagerTask)
+        }
+        project.tasks.withType<JavaCompile>().configureEach {
+            dependsOn(generateResourceManagerTask)
+        }
+
+        // Specifically handle kapt stubs generation in case if consuming project has kotlin-kapt plugin applied.
+        project.pluginManager.withPlugin("kotlin-kapt") {
+            project.tasks.withType<KaptGenerateStubs>().configureEach {
                 dependsOn(generateResourceManagerTask)
             }
+        }
 
         // Add the generated file to the Kotlin source sets so that it can be used as part of the build.
         project.extensions.getByType(BaseExtension::class.java)

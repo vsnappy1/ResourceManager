@@ -1,25 +1,27 @@
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
+    `java-gradle-plugin`
     `kotlin-dsl`
-    kotlin("jvm")
-    id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "1.3.0"
-    id("maven-publish")
-    id("org.jlleitschuh.gradle.ktlint")
+    `maven-publish`
+    alias(libs.plugins.gradle.plugin.publish)
+    alias(libs.plugins.jetbrains.kotlin.jvm)
+    alias(libs.plugins.ktlint)
     jacoco
 }
 apply(from = "../gradle/jacoco.gradle.kts")
 
 val agp: String by project
+val kotlinVersion: String by project
 val pluginGroup = "dev.randos"
-val pluginVersion = "0.0.6"
+val pluginVersion = "0.0.7"
 val pluginName = "resourcemanager"
 
 dependencies {
-    implementation(gradleApi())
-    implementation(localGroovy())
-    compileOnly("com.android.tools.build:gradle:$agp")
+    compileOnly(gradleApi())
+    compileOnly(localGroovy())
+    compileOnly(libs.android.tools)
+    compileOnly(libs.kotlin.gradle.plugin)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(gradleTestKit())

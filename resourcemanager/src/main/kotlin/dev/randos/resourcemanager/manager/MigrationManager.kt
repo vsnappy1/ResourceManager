@@ -162,6 +162,8 @@ internal class MigrationManager(
                 if (matchResultImport?.groups?.size == 2) {
                     currentResourceImportStatement = matchResultImport.groups[0]?.value.orEmpty()
                     currentResourceImportStatementIndex = index
+                    // Since we may be including a new line, increment index.
+                    index++
                 }
 
                 var matchResultResources: Sequence<MatchResult>

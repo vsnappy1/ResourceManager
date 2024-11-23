@@ -76,7 +76,7 @@ internal class ResourceManager(
                     list.add(
                         Resource(
                             type = ResourceType.DRAWABLES,
-                            moduleDetails = ModuleDetails(module, namespace, File(resFile, "drawable"))
+                            moduleDetails = ModuleDetails(module, namespace, File(resFile, drawableDirectory.name))
                         )
                     )
                 }
