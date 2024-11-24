@@ -110,7 +110,7 @@ internal class ModuleManager(private val moduleFile: File) {
 
         // Define regex pattern for the style of namespace
         val namespacePattern =
-            Regex("\\s*namespace\\s*=\\s*[\"'](.+)[\"']") // Matches: namespace = "com.example.app"
+            Regex("\\s*namespace\\s*=?\\s*[\"'](.+)[\"']") // Matches: namespace = "com.example.app"
 
         var isBlockComment = false
         val lines = gradleFile.readLines().filter { it.isNotBlank() }
