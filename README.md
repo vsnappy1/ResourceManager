@@ -14,7 +14,7 @@ plugins {
     id("com.android.application") version "8.0.1" apply false
     id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id("dev.randos.resourcemanager") version "0.0.7" apply false    // Add ResourceManager plugin
+    id("dev.randos.resourcemanager") version "0.0.8" apply false    // Add ResourceManager plugin
 }
 ```
 - If your project uses the buildscript block.
@@ -25,7 +25,7 @@ buildScripts {
         classpath "com.android.tools.build:gradle:8.0.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21"
         ...
-        classpath 'dev.randos:resourcemanager:0.0.7'    // Add ResourceManager plugin
+        classpath 'dev.randos:resourcemanager:0.0.8'    // Add ResourceManager plugin
     }
 }
 ```
