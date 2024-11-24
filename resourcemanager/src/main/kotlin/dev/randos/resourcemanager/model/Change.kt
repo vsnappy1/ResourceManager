@@ -7,7 +7,7 @@ package dev.randos.resourcemanager.model
  * @property current The original content of the line before the change.
  * @property updated The new content of the line after the change.
  */
-internal data class Change(
+internal class Change(
     val lineNumber: Int,
     val current: String,
     val updated: String

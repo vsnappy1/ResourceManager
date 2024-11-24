@@ -7,7 +7,7 @@ package dev.randos.resourcemanager.model
  * @property type The type of the resource
  * @see [ValueResourceType]
  */
-internal data class ValueResource(
+internal class ValueResource(
     val name: String,
     val type: ValueResourceType
 )

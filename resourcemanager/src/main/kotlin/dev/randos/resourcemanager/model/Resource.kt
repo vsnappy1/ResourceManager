@@ -8,7 +8,7 @@ package dev.randos.resourcemanager.model
  * @see [ResourceType]
  * @see [ModuleDetails]
  */
-internal data class Resource(
+internal class Resource(
     val type: ResourceType,
     val moduleDetails: ModuleDetails
 )

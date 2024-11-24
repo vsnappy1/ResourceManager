@@ -10,7 +10,7 @@ import java.io.File
  *                     Default value is an empty string if not provided.
  * @property resourceFiles The list of resource files, usually in the module's `src/main/res` path.
  */
-internal data class ModuleDetails(
+internal class ModuleDetails(
     val moduleName: String = "",
     val namespace: String = "",
     val resourceFiles: Array<File>

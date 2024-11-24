@@ -8,7 +8,7 @@ package dev.randos.resourcemanager.model
  * @property changes A list of changes made to this file, where each change includes details such as
  * the line number, original content, and updated content.
  */
-internal data class SourceFileDetails(
+internal class SourceFileDetails(
     val name: String,
     val path: String,
     val changes: List<Change>
