@@ -7,7 +7,6 @@ import dev.randos.resourcemanager.model.Change
 import dev.randos.resourcemanager.model.Resource
 import dev.randos.resourcemanager.model.ResourceType
 import dev.randos.resourcemanager.model.SourceFileDetails
-import dev.randos.resourcemanager.utils.getXmlFiles
 import java.io.File
 
 /**
@@ -354,7 +353,7 @@ internal class MigrationManager(
         resourceIdFunctionNameMap: MutableMap<String, MutableList<String>>
     ) {
         resources.forEach { resource ->
-            resource.moduleDetails.resDirectory.listFiles().getXmlFiles().forEach { file ->
+            resource.moduleDetails.resourceFiles.forEach { file ->
                 val xmlResources = XmlParser.parseXML(file)
                 xmlResources.forEach {
                     val resourceId = "R.${it.type.value}.${it.name}"
@@ -371,7 +370,7 @@ internal class MigrationManager(
         resourceIdFunctionNameMap: MutableMap<String, MutableList<String>>
     ) {
         resources.forEach { resource ->
-            resource.moduleDetails.resDirectory.listFiles()?.forEach { file ->
+            resource.moduleDetails.resourceFiles.forEach { file ->
                 val resourceId = "R.drawable.${file.nameWithoutExtension}"
                 val functionName = ClassFileGenerator.getDrawableMethodName(file.nameWithoutExtension, resource.moduleDetails)
                 resourceIdFunctionNameMap[resourceId] = resourceIdFunctionNameMap.getOrDefault(resourceId, mutableListOf())

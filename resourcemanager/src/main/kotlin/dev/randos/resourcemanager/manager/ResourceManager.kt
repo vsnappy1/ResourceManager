@@ -4,6 +4,7 @@ import dev.randos.resourcemanager.model.ModuleDetails
 import dev.randos.resourcemanager.model.Resource
 import dev.randos.resourcemanager.model.ResourceType
 import java.io.File
+import java.io.FileFilter
 
 /**
  * Manages resource files within an Android project, including identifying files under observation
@@ -35,13 +36,15 @@ internal class ResourceManager(
     fun getResources(): List<Resource> {
         val list = mutableListOf<Resource>()
         val moduleDependencies = moduleManager.getModuleDependencies()
+        val xmlFileFilter = FileFilter { it.isXmlFile() }
+        val drawableFileFilter = FileFilter { it.isValidResourceName() }
         var resFile = File(moduleFile, "src/main/res")
 
         // Locate the "values" directory within the "res" directory.
         list.add(
             Resource(
                 type = ResourceType.VALUES,
-                moduleDetails = ModuleDetails(resDirectory = File(resFile, "values"))
+                moduleDetails = ModuleDetails(resourceFiles = File(resFile, "values").listFiles(xmlFileFilter) ?: emptyArray())
             )
         )
 
@@ -50,7 +53,7 @@ internal class ResourceManager(
             list.add(
                 Resource(
                     type = ResourceType.DRAWABLES,
-                    moduleDetails = ModuleDetails(resDirectory = File(resFile, drawableDirectory.name))
+                    moduleDetails = ModuleDetails(resourceFiles = File(resFile, drawableDirectory.name).listFiles(drawableFileFilter) ?: emptyArray())
                 )
             )
         }
@@ -67,7 +70,7 @@ internal class ResourceManager(
                 list.add(
                     Resource(
                         type = ResourceType.VALUES,
-                        moduleDetails = ModuleDetails(module, namespace, File(resFile, "values"))
+                        moduleDetails = ModuleDetails(module, namespace, File(resFile, "values").listFiles(xmlFileFilter) ?: emptyArray())
                     )
                 )
 
@@ -76,7 +79,7 @@ internal class ResourceManager(
                     list.add(
                         Resource(
                             type = ResourceType.DRAWABLES,
-                            moduleDetails = ModuleDetails(module, namespace, File(resFile, drawableDirectory.name))
+                            moduleDetails = ModuleDetails(module, namespace, File(resFile, drawableDirectory.name).listFiles(drawableFileFilter) ?: emptyArray())
                         )
                     )
                 }
@@ -93,13 +96,18 @@ internal class ResourceManager(
      */
     private fun List<Resource>.getFilesUnderObservation(): List<File> {
         val files = mutableListOf<File>()
-        this.map { it.moduleDetails.resDirectory }.forEach { directory ->
-            directory.walkTopDown().forEach { file ->
-                if (file.isFile) {
-                    files.add(file)
-                }
-            }
+        forEach { resource ->
+            files.addAll(resource.moduleDetails.resourceFiles)
         }
         return files
+    }
+
+    private fun File.isXmlFile(): Boolean {
+        return extension.lowercase() == "xml"
+    }
+
+    private fun File.isValidResourceName(): Boolean {
+        val validResourceNameRegex = "^[a-z][a-z0-9_]*$".toRegex()
+        return nameWithoutExtension.isNotEmpty() && validResourceNameRegex.matches(nameWithoutExtension)
     }
 }

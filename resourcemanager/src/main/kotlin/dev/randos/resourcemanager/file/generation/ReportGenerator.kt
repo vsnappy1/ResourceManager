@@ -85,6 +85,11 @@ internal object ReportGenerator {
             appendLine(1, "<body>")
             appendLine(2, "<h1>Resource Manager Migration Report</h1>")
             appendLine(2, "<p>Generated on ${getFormattedDate()}</p>")
+            val filesCount = files.count()
+            val changeCount = files.flatMap { it.changes }.size
+            val fileText = if (filesCount > 1) "files" else "file"
+            val changeText = if (changeCount > 1) "changes" else "change"
+            appendLine(2, "<p>Modified $filesCount $fileText with a total of $changeCount $changeText applied.</p>")
 
             for (file in files) {
                 appendLine(2, "<div class=\"file-section\">")

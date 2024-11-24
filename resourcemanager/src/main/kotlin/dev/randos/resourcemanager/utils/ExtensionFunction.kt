@@ -1,7 +1,5 @@
 package dev.randos.resourcemanager.utils
 
-import java.io.File
-
 /**
  * Converts a snake_case or dot.separated string to camelCase.
  * If the string does not contain valid delimiters (e.g., "_" or "."),
@@ -36,8 +34,4 @@ internal fun String.toCamelCase(): String {
     } else {
         this
     }
-}
-
-internal fun Array<File>?.getXmlFiles(): List<File> {
-    return this?.filter { it.extension == "xml" } ?: emptyList()
 }

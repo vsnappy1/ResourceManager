@@ -6,7 +6,6 @@ import dev.randos.resourcemanager.model.Resource
 import dev.randos.resourcemanager.model.ResourceType
 import dev.randos.resourcemanager.model.ValueResource
 import dev.randos.resourcemanager.model.ValueResourceType
-import dev.randos.resourcemanager.utils.getXmlFiles
 import dev.randos.resourcemanager.utils.toCamelCase
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -75,16 +74,13 @@ internal object ClassFileGenerator {
         functionNames.clear()
         appendLine("\tobject Drawables {")
         resources.forEach { resource ->
-            resource.moduleDetails.resDirectory.listFiles()
-                ?.filter { it.nameWithoutExtension.isNotEmpty() }
-                ?.sorted()
-                ?.forEach { file ->
-                    appendDrawableResource(
-                        name = file.nameWithoutExtension,
-                        defaultIndentation = "\t\t",
-                        moduleDetails = resource.moduleDetails
-                    )
-                }
+            resource.moduleDetails.resourceFiles.sorted().forEach { file ->
+                appendDrawableResource(
+                    name = file.nameWithoutExtension,
+                    defaultIndentation = "\t\t",
+                    moduleDetails = resource.moduleDetails
+                )
+            }
         }
         appendLine("\t}")
     }
@@ -92,7 +88,7 @@ internal object ClassFileGenerator {
     private fun StringBuilder.generateObjectForValueResources(resources: List<Resource>) {
         val map = mutableMapOf<String, MutableList<Pair<ModuleDetails, ValueResource>>>()
         resources.forEach { resource ->
-            resource.moduleDetails.resDirectory.listFiles().getXmlFiles().forEach { file ->
+            resource.moduleDetails.resourceFiles.forEach { file ->
                 val xmlResources = XmlParser.parseXML(file)
                 xmlResources.forEach {
                     val key = it.type::class.simpleName.toString()

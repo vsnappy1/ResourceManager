@@ -161,22 +161,22 @@ class ClassFileGeneratorTest {
         val list = mutableListOf<Resource>()
         return list.apply {
             add(
-                Resource(ResourceType.VALUES, ModuleDetails("", "", valueResDirectory))
+                Resource(ResourceType.VALUES, ModuleDetails("", "", valueResDirectory.listFiles() ?: emptyArray()))
             )
             add(
-                Resource(ResourceType.VALUES, ModuleDetails(moduleNameLib1, namespaceLib1, valueResDirectoryLib1))
+                Resource(ResourceType.VALUES, ModuleDetails(moduleNameLib1, namespaceLib1, valueResDirectoryLib1.listFiles() ?: emptyArray()))
             )
             add(
-                Resource(ResourceType.VALUES, ModuleDetails(moduleNameLib2, namespaceLib2, valueResDirectoryLib2))
+                Resource(ResourceType.VALUES, ModuleDetails(moduleNameLib2, namespaceLib2, valueResDirectoryLib2.listFiles() ?: emptyArray()))
             )
             add(
-                Resource(ResourceType.DRAWABLES, ModuleDetails("", "", drawableResDirectory))
+                Resource(ResourceType.DRAWABLES, ModuleDetails("", "", drawableResDirectory.listFiles() ?: emptyArray()))
             )
             add(
-                Resource(ResourceType.DRAWABLES, ModuleDetails(moduleNameLib1, namespaceLib1, drawableResDirectoryLib1))
+                Resource(ResourceType.DRAWABLES, ModuleDetails(moduleNameLib1, namespaceLib1, drawableResDirectoryLib1.listFiles() ?: emptyArray()))
             )
             add(
-                Resource(ResourceType.DRAWABLES, ModuleDetails(moduleNameLib2, namespaceLib2, drawableResDirectoryLib2))
+                Resource(ResourceType.DRAWABLES, ModuleDetails(moduleNameLib2, namespaceLib2, drawableResDirectoryLib2.listFiles() ?: emptyArray()))
             )
         }
     }
