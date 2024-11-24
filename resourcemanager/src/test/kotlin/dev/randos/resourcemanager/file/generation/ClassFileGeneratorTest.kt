@@ -115,6 +115,38 @@ class ClassFileGeneratorTest {
         assertEquals(expectedResult, classContent)
     }
 
+    @Test
+    fun generate_whenClassFileIsGenerated_shouldClearTheFunctionNamesSet() {
+        // Given
+        val gradleFileContent =
+            """
+            android {
+                namespace = "$namespace"
+                compileSdk = 34
+                ..
+            }
+            """.trimIndent()
+        val gradleFile = File(moduleDir, "build.gradle.kts")
+        gradleFile.writeText(gradleFileContent)
+
+        File(valueResDirectory, "resources.xml").also {
+            it.writeText(MockFileReader.read("all_resources.txt"))
+        }
+
+        File(drawableResDirectory, "ic_gift.png").also {
+            it.writeText("")
+        }
+
+        // When
+        ClassFileGenerator.generateClassFile(
+            namespace,
+            getResources()
+        )
+
+        // Then
+        assertEquals(0, ClassFileGenerator.getFunctionNamesSize())
+    }
+
     private fun getColorResourceFileContent(): String {
         return """
             <?xml version="1.0" encoding="utf-8"?>

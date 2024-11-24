@@ -3,6 +3,7 @@
     <string name="string_parameterized_res">Hello %s</string>
     <bool name="bool_res">false</bool>
     <color name="color_res">#FF000000</color>
+    <color name="colorResCamelCase">#FF000000</color>
     <dimen name="dimen_res">20dp</dimen>
     <fraction name="fraction_res">0.3</fraction>
     <integer name="integer_res">10</integer>

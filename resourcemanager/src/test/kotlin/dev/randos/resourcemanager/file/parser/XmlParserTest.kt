@@ -59,6 +59,7 @@ class XmlParserTest {
         assertTrue(map["string_parameterized_res"]?.first()?.type is ValueResourceType.String)
         assertTrue(map["bool_res"]?.first()?.type is ValueResourceType.Boolean)
         assertTrue(map["color_res"]?.first()?.type is ValueResourceType.Color)
+        assertTrue(map["colorResCamelCase"]?.first()?.type is ValueResourceType.Color)
         assertTrue(map["dimen_res"]?.first()?.type is ValueResourceType.Dimension)
         assertTrue(map["fraction_res"]?.first()?.type is ValueResourceType.Fraction)
         assertTrue(map["integer_res"]?.first()?.type is ValueResourceType.Integer)
@@ -69,6 +70,6 @@ class XmlParserTest {
         assertTrue(map["array_mixed"]?.first()?.type is ValueResourceType.StringArray)
         assertTrue(map["int_array_res"]?.first()?.type is ValueResourceType.IntArray)
         assertTrue(map["plurals_res"]?.first()?.type is ValueResourceType.Plural)
-        assertEquals(14, valueResources.size)
+        assertEquals(15, valueResources.size)
     }
 }

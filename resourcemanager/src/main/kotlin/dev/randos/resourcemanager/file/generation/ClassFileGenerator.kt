@@ -8,8 +8,18 @@ import dev.randos.resourcemanager.model.ValueResource
 import dev.randos.resourcemanager.model.ValueResourceType
 import dev.randos.resourcemanager.utils.getXmlFiles
 import dev.randos.resourcemanager.utils.toCamelCase
+import org.jetbrains.annotations.VisibleForTesting
 
 internal object ClassFileGenerator {
+    /**
+     * A set to store the names of functions generated in the class, ensuring uniqueness.
+     *
+     * This mutable set keeps track of function names to avoid generating duplicate
+     * function declarations in the output class.
+     * Add is cleared before processing every new object class creation.
+     */
+    private val functionNames = mutableSetOf<String>()
+
     fun generateClassFile(
         namespace: String,
         files: List<Resource>
@@ -44,6 +54,7 @@ internal object ClassFileGenerator {
                 }
             }
             appendLine("}")
+            functionNames.clear()
         }.toString()
     }
 
@@ -61,17 +72,19 @@ internal object ClassFileGenerator {
         }
 
     private fun StringBuilder.generateObjectForDrawableResources(resources: List<Resource>) {
-        val functionNames = mutableSetOf<String>()
+        functionNames.clear()
         appendLine("\tobject Drawables {")
         resources.forEach { resource ->
-            resource.moduleDetails.resDirectory.listFiles()?.sorted()?.forEach { file ->
-                appendDrawableResource(
-                    name = file.nameWithoutExtension,
-                    defaultIndentation = "\t\t",
-                    moduleDetails = resource.moduleDetails,
-                    functionNames
-                )
-            }
+            resource.moduleDetails.resDirectory.listFiles()
+                ?.filter { it.nameWithoutExtension.isNotEmpty() }
+                ?.sorted()
+                ?.forEach { file ->
+                    appendDrawableResource(
+                        name = file.nameWithoutExtension,
+                        defaultIndentation = "\t\t",
+                        moduleDetails = resource.moduleDetails
+                    )
+                }
         }
         appendLine("\t}")
     }
@@ -103,6 +116,7 @@ internal object ClassFileGenerator {
     ): String {
         val defaultIndentation = "\t\t"
         return StringBuilder().apply {
+            functionNames.clear()
             appendLine("\tobject $name {")
             pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                 when (resource.type) {
@@ -177,20 +191,14 @@ internal object ClassFileGenerator {
     private fun StringBuilder.appendDrawableResource(
         name: String,
         defaultIndentation: String,
-        moduleDetails: ModuleDetails,
-        functionNames: MutableSet<String>
+        moduleDetails: ModuleDetails
     ) {
         val namespaceString = getNamespace(moduleDetails)
-        val moduleNameString = getDrawableMethodName(name, moduleDetails)
-        /*
-          This ensures there are only unique function names in the generated ResourceManager to avoid
-          conflicting overloads issue.
-         */
-        if (functionNames.add(moduleNameString)) {
-            appendLine(
-                "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleNameString(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
-            )
-        }
+        val moduleName = getDrawableMethodName(name, moduleDetails)
+        if (isMethodNameUsedBefore(moduleName)) return
+        appendLine(
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleName(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
+        )
     }
 
     private fun StringBuilder.appendDimensionResource(
@@ -200,6 +208,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : Float = application.resources.getDimension(${namespaceString}R.dimen.${resource.name})"
         )
@@ -212,6 +221,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(theme: Theme = application.theme) : Int = application.resources.getColor(${namespaceString}R.color.${resource.name}, theme)"
         )
@@ -224,6 +234,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : Int = application.resources.getInteger(${namespaceString}R.integer.${resource.name})"
         )
@@ -236,6 +247,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : Boolean = application.resources.getBoolean(${namespaceString}R.bool.${resource.name})"
         )
@@ -248,6 +260,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(${namespaceString}R.fraction.${resource.name}, base, pbase)"
         )
@@ -260,6 +273,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
         )
@@ -272,6 +286,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(${namespaceString}R.plurals.${resource.name}, quantity, args)"
         )
@@ -284,6 +299,7 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : kotlin.Array<String> = application.resources.getStringArray(${namespaceString}R.array.${resource.name})"
         )
@@ -296,9 +312,30 @@ internal object ClassFileGenerator {
     ) {
         val namespaceString = getNamespace(moduleDetails)
         val methodName = getValueResourceMethodName(resource, moduleDetails)
+        if (isMethodNameUsedBefore(methodName)) return
         appendLine(
             "$defaultIndentation@JvmStatic fun $methodName() : IntArray = application.resources.getIntArray(${namespaceString}R.array.${resource.name})"
         )
+    }
+
+    /**
+     * Checks whether the given method name has already been used in the generated ResourceManager class
+     * (specifically in object currently being processed).
+     *
+     * @param methodName The name of the method to check for uniqueness.
+     * @return `true` if the method name has been used before, otherwise `false`.
+     */
+    private fun isMethodNameUsedBefore(methodName: String): Boolean {
+        /*
+          This ensures there are only unique function names in the generated ResourceManager class to avoid
+          conflicting overloads(compile time error).
+         */
+        return !functionNames.add(methodName)
+    }
+
+    @VisibleForTesting
+    fun getFunctionNamesSize(): Int {
+        return functionNames.size
     }
 
     /**

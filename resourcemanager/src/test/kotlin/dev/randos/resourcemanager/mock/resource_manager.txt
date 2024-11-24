@@ -25,6 +25,7 @@ object ResourceManager {
 	object Colors {
 		@JvmOverloads @JvmStatic fun black(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.black, theme)
 		@JvmOverloads @JvmStatic fun black_lib2(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib2.R.color.black, theme)
+		@JvmOverloads @JvmStatic fun colorResCamelCase(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.colorResCamelCase, theme)
 		@JvmOverloads @JvmStatic fun colorRes(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.color_res, theme)
 		@JvmOverloads @JvmStatic fun colorResMod_lib1(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib1.R.color.color_res_mod, theme)
 		@JvmOverloads @JvmStatic fun white(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.white, theme)
