@@ -1,50 +1,48 @@
 # ResourceManager
 ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code.
 
-[![Gradle Plugin Portal](https://img.shields.io/maven-metadata/v?label=Gradle%20Plugin%20Portal&metadataUrl=https%3A%2F%2Fplugins.gradle.org%2Fm2%2Fdev%2Frandos%2Fresourcemanager%2Fdev.randos.resourcemanager.gradle.plugin%2Fmaven-metadata.xml)](https://plugins.gradle.org/plugin/dev.randos.resourcemanager)
-![Platform Support](https://img.shields.io/badge/platform-Android-brightgreen.svg)
+<p>
+  <a href="https://plugins.gradle.org/plugin/dev.randos.resourcemanager"><img alt="License" src="https://img.shields.io/maven-metadata/v?label=Gradle%20Plugin%20Portal&metadataUrl=https%3A%2F%2Fplugins.gradle.org%2Fm2%2Fdev%2Frandos%2Fresourcemanager%2Fdev.randos.resourcemanager.gradle.plugin%2Fmaven-metadata.xml"/></a>
+  <a href="https://android-arsenal.com/api?level=4"><img alt="API" src="https://img.shields.io/badge/API-4%2B-brightgreen.svg?style=flat"/></a>
+  <a href="https://github.com/vsnappy1/resourcemanager/actions"><img alt="Build Status" src="https://github.com/vsnappy1/resourcemanager/workflows/Android%20CI/badge.svg"/></a>
+  <a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/></a>
+</p>
 
 ## Setup
 
 ### Step 1: Add ResourceManager Plugin
 Add resourcemanager plugin to your project's root __build.gradle(.kts)__ file.
-- If your project uses the plugins block.
 ```kotlin
+// If your project uses the plugins block, add the following:
 plugins {
     id("com.android.application") version "8.0.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.8.21" apply false
     ...
-    id("dev.randos.resourcemanager") version "0.0.9" apply false    // Add ResourceManager plugin
+    id("dev.randos.resourcemanager") version "0.1.0" apply false
 }
-```
-- If your project uses the buildscript block.
-```kotlin
+
+// Alternatively, if your project uses the buildscript block, include this:
 buildScripts {
-    ...
     dependencies {
         classpath "com.android.tools.build:gradle:8.0.1"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21"
         ...
-        classpath 'dev.randos:resourcemanager:0.0.9'    // Add ResourceManager plugin
+        classpath 'dev.randos:resourcemanager:0.1.0'
     }
-}
 ```
 
 ### Step 2: Apply ResourceManager Plugin
 Apply the ResourceManager plugin in your module-level __build.gradle(.kts)__ file.
-- If you are using the plugins block, add the following:
 ```kotlin
+// If you are using the plugins block, add the following:
 plugins {
     id("com.android.application")
     ...
-    id("dev.randos.resourcemanager")    // Apply ResourceManager plugin
+    id("dev.randos.resourcemanager")
 }
-```
-- If your project uses the apply statement, include this:
-```kotlin
+
+// Alternatively, if your project uses the apply statement, include this:
 apply plugin: 'com.android.application'
 ...
-apply plugin: 'dev.randos.resourcemanager'    // Apply ResourceManager plugin
+apply plugin: 'dev.randos.resourcemanager'
 ```
 
 ### Step 3: Initialize ResourceManager
@@ -58,8 +56,8 @@ class MyApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        ResourceManager.initialize(this)
         ...
-        ResourceManager.initialize(this)    // Initializes ResourceManager
     }
 }
 ```
@@ -78,7 +76,7 @@ class MyViewModel : ViewModel() {
 }
 ```
 
-## Migration
+## Migration (Beta)
 To streamline the transition to ResourceManager, plugin comes with a Gradle task to automate key aspects of the migration process. Please follow these steps carefully.
 
 #### Important Warning ⚠️

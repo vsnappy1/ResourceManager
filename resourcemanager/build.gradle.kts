@@ -14,7 +14,7 @@ apply(from = "../gradle/jacoco.gradle.kts")
 val agp: String by project
 val kotlinVersion: String by project
 val pluginGroup = "dev.randos"
-val pluginVersion = "0.0.9"
+val pluginVersion = "0.1.0"
 val pluginName = "resourcemanager"
 
 dependencies {

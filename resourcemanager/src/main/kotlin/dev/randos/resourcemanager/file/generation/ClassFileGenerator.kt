@@ -28,11 +28,12 @@ internal object ClassFileGenerator {
             appendLine("import android.app.Application")
             appendLine("import android.graphics.drawable.Drawable")
             appendLine("import android.content.res.Resources.Theme")
+            appendLine("import android.os.Build")
             appendLine("import $namespace.R\n")
             appendLine("object ResourceManager {\n")
             appendLine("\tprivate var _application: Application? = null")
             appendLine("\tprivate val application: Application")
-            appendLine("\t\tget() = _application ?: throw IllegalStateException(\"ResourceManager is not initialized. Please call ResourceManager.initialize(this) in your Application class.\")\n")
+            appendLine("\t\tget() = _application ?: throw IllegalStateException(\"ResourceManager is not initialized. Please invoke ResourceManager.initialize(this) in onCreate method of your Application class.\")\n")
             appendLine("\t@JvmStatic")
             appendLine("\tfun initialize(application: Application) {")
             appendLine("\t\t_application = application")
@@ -72,6 +73,7 @@ internal object ClassFileGenerator {
 
     private fun StringBuilder.generateObjectForDrawableResources(resources: List<Resource>) {
         functionNames.clear()
+        appendLine("\t@Suppress(\"DEPRECATION\")")
         appendLine("\tobject Drawables {")
         resources.forEach { resource ->
             resource.moduleDetails.resourceFiles.sorted().forEach { file ->
@@ -113,6 +115,9 @@ internal object ClassFileGenerator {
         val defaultIndentation = "\t\t"
         return StringBuilder().apply {
             functionNames.clear()
+            if (name == "Colors") {
+                appendLine("\t@Suppress(\"DEPRECATION\")")
+            }
             appendLine("\tobject $name {")
             pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                 when (resource.type) {
@@ -193,7 +198,7 @@ internal object ClassFileGenerator {
         val moduleName = getDrawableMethodName(name, moduleDetails)
         if (isMethodNameUsedBefore(moduleName)) return
         appendLine(
-            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleName(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(${namespaceString}R.drawable.$name, theme)"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleName(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(${namespaceString}R.drawable.$name, theme) } else { application.resources.getDrawable(${namespaceString}R.drawable.$name) }"
         )
     }
 
@@ -219,7 +224,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(theme: Theme = application.theme) : Int = application.resources.getColor(${namespaceString}R.color.${resource.name}, theme)"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(${namespaceString}R.color.${resource.name}, theme) } else { application.resources.getColor(${namespaceString}R.color.${resource.name}) }"
         )
     }
 

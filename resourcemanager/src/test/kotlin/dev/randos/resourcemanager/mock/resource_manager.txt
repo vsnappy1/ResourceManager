@@ -3,13 +3,14 @@ package com.example.application
 import android.app.Application
 import android.graphics.drawable.Drawable
 import android.content.res.Resources.Theme
+import android.os.Build
 import com.example.application.R
 
 object ResourceManager {
 
 	private var _application: Application? = null
 	private val application: Application
-		get() = _application ?: throw IllegalStateException("ResourceManager is not initialized. Please call ResourceManager.initialize(this) in your Application class.")
+		get() = _application ?: throw IllegalStateException("ResourceManager is not initialized. Please invoke ResourceManager.initialize(this) in onCreate method of your Application class.")
 
 	@JvmStatic
 	fun initialize(application: Application) {
@@ -22,14 +23,15 @@ object ResourceManager {
 		@JvmStatic fun boolResMod_lib1() : Boolean = application.resources.getBoolean(com.example.lib1.R.bool.bool_res_mod)
 	}
 
+	@Suppress("DEPRECATION")
 	object Colors {
-		@JvmOverloads @JvmStatic fun black(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.black, theme)
-		@JvmOverloads @JvmStatic fun black_lib2(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib2.R.color.black, theme)
-		@JvmOverloads @JvmStatic fun colorResCamelCase(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.colorResCamelCase, theme)
-		@JvmOverloads @JvmStatic fun colorRes(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.color_res, theme)
-		@JvmOverloads @JvmStatic fun colorResMod_lib1(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib1.R.color.color_res_mod, theme)
-		@JvmOverloads @JvmStatic fun white(theme: Theme = application.theme) : Int = application.resources.getColor(R.color.white, theme)
-		@JvmOverloads @JvmStatic fun white_lib2(theme: Theme = application.theme) : Int = application.resources.getColor(com.example.lib2.R.color.white, theme)
+		@JvmOverloads @JvmStatic fun black(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.black, theme) } else { application.resources.getColor(R.color.black) }
+		@JvmOverloads @JvmStatic fun black_lib2(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(com.example.lib2.R.color.black, theme) } else { application.resources.getColor(com.example.lib2.R.color.black) }
+		@JvmOverloads @JvmStatic fun colorResCamelCase(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.colorResCamelCase, theme) } else { application.resources.getColor(R.color.colorResCamelCase) }
+		@JvmOverloads @JvmStatic fun colorRes(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.color_res, theme) } else { application.resources.getColor(R.color.color_res) }
+		@JvmOverloads @JvmStatic fun colorResMod_lib1(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(com.example.lib1.R.color.color_res_mod, theme) } else { application.resources.getColor(com.example.lib1.R.color.color_res_mod) }
+		@JvmOverloads @JvmStatic fun white(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.white, theme) } else { application.resources.getColor(R.color.white) }
+		@JvmOverloads @JvmStatic fun white_lib2(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(com.example.lib2.R.color.white, theme) } else { application.resources.getColor(com.example.lib2.R.color.white) }
 	}
 
 	object Dimensions {
@@ -75,11 +77,12 @@ object ResourceManager {
 	}
 
 	// ----- DRAWABLES -----
+	@Suppress("DEPRECATION")
 	object Drawables {
-		@JvmOverloads @JvmStatic fun icArrow(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.ic_arrow, theme)
-		@JvmOverloads @JvmStatic fun icGift(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.ic_gift, theme)
-		@JvmOverloads @JvmStatic fun icLauncherForeground(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(R.drawable.ic_launcher_foreground, theme)
-		@JvmOverloads @JvmStatic fun icCart_lib1(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(com.example.lib1.R.drawable.ic_cart, theme)
-		@JvmOverloads @JvmStatic fun icDone_lib2(theme: Theme = application.theme) : Drawable = application.resources.getDrawable(com.example.lib2.R.drawable.ic_done, theme)
+		@JvmOverloads @JvmStatic fun icArrow(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(R.drawable.ic_arrow, theme) } else { application.resources.getDrawable(R.drawable.ic_arrow) }
+		@JvmOverloads @JvmStatic fun icGift(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(R.drawable.ic_gift, theme) } else { application.resources.getDrawable(R.drawable.ic_gift) }
+		@JvmOverloads @JvmStatic fun icLauncherForeground(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(R.drawable.ic_launcher_foreground, theme) } else { application.resources.getDrawable(R.drawable.ic_launcher_foreground) }
+		@JvmOverloads @JvmStatic fun icCart_lib1(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(com.example.lib1.R.drawable.ic_cart, theme) } else { application.resources.getDrawable(com.example.lib1.R.drawable.ic_cart) }
+		@JvmOverloads @JvmStatic fun icDone_lib2(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(com.example.lib2.R.drawable.ic_done, theme) } else { application.resources.getDrawable(com.example.lib2.R.drawable.ic_done) }
 	}
 }
