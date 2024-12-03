@@ -1,5 +1,5 @@
 # ResourceManager
-ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code.
+ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android (e.g., Activity, Fragment, Composable) and non-Android components (e.g., ViewModel) using generated code.
 
 <p>
   <a href="https://plugins.gradle.org/plugin/dev.randos.resourcemanager"><img alt="License" src="https://img.shields.io/maven-metadata/v?label=Gradle%20Plugin%20Portal&metadataUrl=https%3A%2F%2Fplugins.gradle.org%2Fm2%2Fdev%2Frandos%2Fresourcemanager%2Fdev.randos.resourcemanager.gradle.plugin%2Fmaven-metadata.xml"/></a>
@@ -16,16 +16,16 @@ Add resourcemanager plugin to your project's root __build.gradle(.kts)__ file.
 // If your project uses the plugins block, add the following:
 plugins {
     id("com.android.application") version "8.0.1" apply false
-    ...
     id("dev.randos.resourcemanager") version "0.1.0" apply false
+    ....
 }
 
 // Alternatively, if your project uses the buildscript block, include this:
 buildScripts {
     dependencies {
         classpath "com.android.tools.build:gradle:8.0.1"
-        ...
         classpath 'dev.randos:resourcemanager:0.1.0'
+        ....
     }
 ```
 
@@ -35,14 +35,14 @@ Apply the ResourceManager plugin in your module-level __build.gradle(.kts)__ fil
 // If you are using the plugins block, add the following:
 plugins {
     id("com.android.application")
-    ...
     id("dev.randos.resourcemanager")
+    ....
 }
 
 // Alternatively, if your project uses the apply statement, include this:
 apply plugin: 'com.android.application'
-...
 apply plugin: 'dev.randos.resourcemanager'
+....
 ```
 
 ### Step 3: Initialize ResourceManager
@@ -53,21 +53,29 @@ To enable ResourceManager, follow these steps:
 
 ```kotlin
 class MyApplication: Application() {
-
+    
     override fun onCreate() {
         super.onCreate()
         ResourceManager.initialize(this)
-        ...
     }
 }
 ```
 
 ## Usage
-Here’s an example of how to use ResourceManager in a ViewModel
+Here’s an example of how `ResourceManager` is typically used in an `Activity` and a `ViewModel`.
 
 ```kotlin
+class MainActivity : ComponentActivity() {
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding.titleTextView.setText(ResourceManager.Strings.greetings("Kumar"))
+        binding.avatarImageView.setImageDrawable(ResourceManager.Drawables.icAvatar())
+    }
+}
+
 class MyViewModel : ViewModel() {
-    ...
+    
     fun getData() {
         _title.postValue(ResourceManager.Strings.title())
         _icon.postValue(ResourceManager.Drawables.icDoneButton())
@@ -98,3 +106,8 @@ __Note:*__ The `-PconfirmMigration=true` parameter confirms that you understand 
 1. Review the generated migration report, located at *.../build/reports/migration/resourcemanager-migration-report.html*.
 2. Verify your project builds successfully without warnings or errors.
 3. Ensure that all resources are correctly migrated and that the application behaves as expected.
+
+## Contributions
+We love collaboration! Contributions are highly encouraged, whether it’s fixing a bug, suggesting improvements, or adding new features.
+
+Create a branch for your changes, and submit a pull request. Let’s build something amazing together! 🚀
