@@ -16,7 +16,7 @@ Add resourcemanager plugin to your project's root __build.gradle(.kts)__ file.
 // If your project uses the plugins block, add the following:
 plugins {
     id("com.android.application") version "8.0.1" apply false
-    id("dev.randos.resourcemanager") version "0.1.0" apply false
+    id("dev.randos.resourcemanager") version "0.1.1" apply false
     ....
 }
 
@@ -24,7 +24,7 @@ plugins {
 buildScripts {
     dependencies {
         classpath "com.android.tools.build:gradle:8.0.1"
-        classpath 'dev.randos:resourcemanager:0.1.0'
+        classpath 'dev.randos:resourcemanager:0.1.1'
         ....
     }
 ```
@@ -83,6 +83,7 @@ class MyViewModel : ViewModel() {
     }
 }
 ```
+__Note*__ If your app supports dynamic __locale__, __theme__ or __orientation__ changes at runtime (via code), pass the appropriate context (e.g., an `Activity` context) to the function (i.e `ResourceManager.Colors.primaryGreen(context)`).
 
 ## Migration (Beta)
 To streamline the transition to ResourceManager, plugin comes with a Gradle task to automate key aspects of the migration process. Please follow these steps carefully.
@@ -108,6 +109,6 @@ __Note:*__ The `-PconfirmMigration=true` parameter confirms that you understand 
 3. Ensure that all resources are correctly migrated and that the application behaves as expected.
 
 ## Contributions
-We love collaboration! Contributions are highly encouraged, whether it’s fixing a bug, suggesting improvements, or adding new features.
+Contributions are highly encouraged, whether it’s fixing a bug, suggesting improvements, or adding new features.
 
 Create a branch for your changes, and submit a pull request. Let’s build something amazing together! 🚀

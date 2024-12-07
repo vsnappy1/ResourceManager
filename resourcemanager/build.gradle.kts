@@ -14,7 +14,7 @@ apply(from = "../gradle/jacoco.gradle.kts")
 val agp: String by project
 val kotlinVersion: String by project
 val pluginGroup = "dev.randos"
-val pluginVersion = "0.1.0"
+val pluginVersion = "0.1.1"
 val pluginName = "resourcemanager"
 
 dependencies {
@@ -38,7 +38,7 @@ gradlePlugin {
             id = "dev.randos.resourcemanager"
             implementationClass = "ResourceManagerPlugin"
             displayName = "Resource Manager"
-            description = "ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android and non-Android components (e.g., ViewModel) using generated code."
+            description = "ResourceManager is an Android plugin that simplifies accessing Android resources (strings, colors, drawables, etc.) in both Android (e.g., Activity, Fragment, Composable) and non-Android components (e.g., ViewModel) using generated code."
             tags.set(listOf("Android", "Android Resources", "Code Generation"))
         }
     }

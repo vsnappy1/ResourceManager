@@ -1,6 +1,7 @@
 package com.example.application
 
 import android.app.Application
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.content.res.Resources.Theme
 import android.os.Build
@@ -18,71 +19,161 @@ object ResourceManager {
 	}
 
 	// ----- VALUES -----
+	/**
+	 * Provides access to bool resources.
+	 *
+	 * By default, each function in the `Booleans` object uses the `Application` context to
+	 * fetch bool resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object Booleans {
-		@JvmStatic fun boolRes() : Boolean = application.resources.getBoolean(R.bool.bool_res)
-		@JvmStatic fun boolResMod_lib1() : Boolean = application.resources.getBoolean(com.example.lib1.R.bool.bool_res_mod)
+		@JvmOverloads @JvmStatic fun boolRes(context: Context = application) : Boolean = context.resources.getBoolean(R.bool.bool_res)
+		@JvmOverloads @JvmStatic fun boolResMod_lib1(context: Context = application) : Boolean = context.resources.getBoolean(com.example.lib1.R.bool.bool_res_mod)
 	}
 
+	/**
+	 * Provides access to color resources.
+	 *
+	 * By default, each function in the `Colors` object uses the `Application` context to
+	 * fetch color resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	@Suppress("DEPRECATION")
 	object Colors {
-		@JvmOverloads @JvmStatic fun black(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.black, theme) } else { application.resources.getColor(R.color.black) }
-		@JvmOverloads @JvmStatic fun black_lib2(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(com.example.lib2.R.color.black, theme) } else { application.resources.getColor(com.example.lib2.R.color.black) }
-		@JvmOverloads @JvmStatic fun colorResCamelCase(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.colorResCamelCase, theme) } else { application.resources.getColor(R.color.colorResCamelCase) }
-		@JvmOverloads @JvmStatic fun colorRes(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.color_res, theme) } else { application.resources.getColor(R.color.color_res) }
-		@JvmOverloads @JvmStatic fun colorResMod_lib1(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(com.example.lib1.R.color.color_res_mod, theme) } else { application.resources.getColor(com.example.lib1.R.color.color_res_mod) }
-		@JvmOverloads @JvmStatic fun white(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(R.color.white, theme) } else { application.resources.getColor(R.color.white) }
-		@JvmOverloads @JvmStatic fun white_lib2(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(com.example.lib2.R.color.white, theme) } else { application.resources.getColor(com.example.lib2.R.color.white) }
+		@JvmOverloads @JvmStatic fun black(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(R.color.black, context.theme) } else { context.resources.getColor(R.color.black) }
+		@JvmOverloads @JvmStatic fun black_lib2(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(com.example.lib2.R.color.black, context.theme) } else { context.resources.getColor(com.example.lib2.R.color.black) }
+		@JvmOverloads @JvmStatic fun colorResCamelCase(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(R.color.colorResCamelCase, context.theme) } else { context.resources.getColor(R.color.colorResCamelCase) }
+		@JvmOverloads @JvmStatic fun colorRes(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(R.color.color_res, context.theme) } else { context.resources.getColor(R.color.color_res) }
+		@JvmOverloads @JvmStatic fun colorResMod_lib1(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(com.example.lib1.R.color.color_res_mod, context.theme) } else { context.resources.getColor(com.example.lib1.R.color.color_res_mod) }
+		@JvmOverloads @JvmStatic fun white(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(R.color.white, context.theme) } else { context.resources.getColor(R.color.white) }
+		@JvmOverloads @JvmStatic fun white_lib2(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(com.example.lib2.R.color.white, context.theme) } else { context.resources.getColor(com.example.lib2.R.color.white) }
 	}
 
+	/**
+	 * Provides access to dimen resources.
+	 *
+	 * By default, each function in the `Dimensions` object uses the `Application` context to
+	 * fetch dimen resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object Dimensions {
-		@JvmStatic fun dimenRes() : Float = application.resources.getDimension(R.dimen.dimen_res)
-		@JvmStatic fun dimenResMod_lib1() : Float = application.resources.getDimension(com.example.lib1.R.dimen.dimen_res_mod)
+		@JvmOverloads @JvmStatic fun dimenRes(context: Context = application) : Float = context.resources.getDimension(R.dimen.dimen_res)
+		@JvmOverloads @JvmStatic fun dimenResMod_lib1(context: Context = application) : Float = context.resources.getDimension(com.example.lib1.R.dimen.dimen_res_mod)
 	}
 
+	/**
+	 * Provides access to fraction resources.
+	 *
+	 * By default, each function in the `Fractions` object uses the `Application` context to
+	 * fetch fraction resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object Fractions {
-		@JvmStatic fun fractionRes(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(R.fraction.fraction_res, base, pbase)
-		@JvmStatic fun fractionResMod_lib1(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(com.example.lib1.R.fraction.fraction_res_mod, base, pbase)
+		@JvmOverloads @JvmStatic fun fractionRes(base: Int = 0, pbase: Int = 0, context: Context = application) : Float = context.resources.getFraction(R.fraction.fraction_res, base, pbase)
+		@JvmOverloads @JvmStatic fun fractionResMod_lib1(base: Int = 0, pbase: Int = 0, context: Context = application) : Float = context.resources.getFraction(com.example.lib1.R.fraction.fraction_res_mod, base, pbase)
 	}
 
+	/**
+	 * Provides access to array resources.
+	 *
+	 * By default, each function in the `IntArrays` object uses the `Application` context to
+	 * fetch array resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object IntArrays {
-		@JvmStatic fun arrayColor() : IntArray = application.resources.getIntArray(R.array.array_color)
-		@JvmStatic fun arrayInt() : IntArray = application.resources.getIntArray(R.array.array_int)
-		@JvmStatic fun arrayRes() : IntArray = application.resources.getIntArray(R.array.array_res)
-		@JvmStatic fun arrayResMod_lib1() : IntArray = application.resources.getIntArray(com.example.lib1.R.array.array_res_mod)
-		@JvmStatic fun intArrayRes() : IntArray = application.resources.getIntArray(R.array.int_array_res)
-		@JvmStatic fun intArrayResMod_lib1() : IntArray = application.resources.getIntArray(com.example.lib1.R.array.int_array_res_mod)
+		@JvmOverloads @JvmStatic fun arrayColor(context: Context = application) : IntArray = context.resources.getIntArray(R.array.array_color)
+		@JvmOverloads @JvmStatic fun arrayInt(context: Context = application) : IntArray = context.resources.getIntArray(R.array.array_int)
+		@JvmOverloads @JvmStatic fun arrayRes(context: Context = application) : IntArray = context.resources.getIntArray(R.array.array_res)
+		@JvmOverloads @JvmStatic fun arrayResMod_lib1(context: Context = application) : IntArray = context.resources.getIntArray(com.example.lib1.R.array.array_res_mod)
+		@JvmOverloads @JvmStatic fun intArrayRes(context: Context = application) : IntArray = context.resources.getIntArray(R.array.int_array_res)
+		@JvmOverloads @JvmStatic fun intArrayResMod_lib1(context: Context = application) : IntArray = context.resources.getIntArray(com.example.lib1.R.array.int_array_res_mod)
 	}
 
+	/**
+	 * Provides access to integer resources.
+	 *
+	 * By default, each function in the `Integers` object uses the `Application` context to
+	 * fetch integer resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object Integers {
-		@JvmStatic fun integerRes() : Int = application.resources.getInteger(R.integer.integer_res)
-		@JvmStatic fun integerRes_lib1() : Int = application.resources.getInteger(com.example.lib1.R.integer.integer_res)
+		@JvmOverloads @JvmStatic fun integerRes(context: Context = application) : Int = context.resources.getInteger(R.integer.integer_res)
+		@JvmOverloads @JvmStatic fun integerRes_lib1(context: Context = application) : Int = context.resources.getInteger(com.example.lib1.R.integer.integer_res)
 	}
 
+	/**
+	 * Provides access to plurals resources.
+	 *
+	 * By default, each function in the `Plurals` object uses the `Application` context to
+	 * fetch plurals resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object Plurals {
-		@JvmStatic fun pluralsRes(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(R.plurals.plurals_res, quantity, args)
-		@JvmStatic fun pluralsResMod_lib1(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(com.example.lib1.R.plurals.plurals_res_mod, quantity, args)
+		@JvmOverloads @JvmStatic fun pluralsRes(quantity: Int, vararg args: Any = emptyArray(), context: Context = application) : String = context.resources.getQuantityString(R.plurals.plurals_res, quantity, args)
+		@JvmOverloads @JvmStatic fun pluralsResMod_lib1(quantity: Int, vararg args: Any = emptyArray(), context: Context = application) : String = context.resources.getQuantityString(com.example.lib1.R.plurals.plurals_res_mod, quantity, args)
 	}
 
+	/**
+	 * Provides access to string resources.
+	 *
+	 * By default, each function in the `Strings` object uses the `Application` context to
+	 * fetch string resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object Strings {
-		@JvmStatic fun stringParameterizedRes(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(R.string.string_parameterized_res) else application.resources.getString(R.string.string_parameterized_res, *args)
-		@JvmStatic fun stringParameterizedResMod_lib1(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(com.example.lib1.R.string.string_parameterized_res_mod) else application.resources.getString(com.example.lib1.R.string.string_parameterized_res_mod, *args)
-		@JvmStatic fun stringRes(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(R.string.string_res) else application.resources.getString(R.string.string_res, *args)
-		@JvmStatic fun stringResMod_lib1(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(com.example.lib1.R.string.string_res_mod) else application.resources.getString(com.example.lib1.R.string.string_res_mod, *args)
+		@JvmOverloads @JvmStatic fun stringParameterizedRes(vararg args: Any? = emptyArray(), context: Context = application) : String = if (args.isEmpty()) context.resources.getString(R.string.string_parameterized_res) else context.resources.getString(R.string.string_parameterized_res, *args)
+		@JvmOverloads @JvmStatic fun stringParameterizedResMod_lib1(vararg args: Any? = emptyArray(), context: Context = application) : String = if (args.isEmpty()) context.resources.getString(com.example.lib1.R.string.string_parameterized_res_mod) else context.resources.getString(com.example.lib1.R.string.string_parameterized_res_mod, *args)
+		@JvmOverloads @JvmStatic fun stringRes(vararg args: Any? = emptyArray(), context: Context = application) : String = if (args.isEmpty()) context.resources.getString(R.string.string_res) else context.resources.getString(R.string.string_res, *args)
+		@JvmOverloads @JvmStatic fun stringResMod_lib1(vararg args: Any? = emptyArray(), context: Context = application) : String = if (args.isEmpty()) context.resources.getString(com.example.lib1.R.string.string_res_mod) else context.resources.getString(com.example.lib1.R.string.string_res_mod, *args)
 	}
 
+	/**
+	 * Provides access to array resources.
+	 *
+	 * By default, each function in the `StringArrays` object uses the `Application` context to
+	 * fetch array resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	object StringArrays {
-		@JvmStatic fun arrayMixed() : kotlin.Array<String> = application.resources.getStringArray(R.array.array_mixed)
-		@JvmStatic fun stringArrayRes() : kotlin.Array<String> = application.resources.getStringArray(R.array.string_array_res)
-		@JvmStatic fun stringArrayResMod_lib1() : kotlin.Array<String> = application.resources.getStringArray(com.example.lib1.R.array.string_array_res_mod)
+		@JvmOverloads @JvmStatic fun arrayMixed(context: Context = application) : kotlin.Array<String> = context.resources.getStringArray(R.array.array_mixed)
+		@JvmOverloads @JvmStatic fun stringArrayRes(context: Context = application) : kotlin.Array<String> = context.resources.getStringArray(R.array.string_array_res)
+		@JvmOverloads @JvmStatic fun stringArrayResMod_lib1(context: Context = application) : kotlin.Array<String> = context.resources.getStringArray(com.example.lib1.R.array.string_array_res_mod)
 	}
 
 	// ----- DRAWABLES -----
+	/**
+	 * Provides access to drawable resources.
+	 *
+	 * By default, each function in the `Drawables` object uses the `Application` context to
+	 * fetch drawable resource.
+	 *
+	 * To support dynamic locale, theme or orientation changes at runtime, pass
+	 * the appropriate context (e.g., an `Activity` context) to the function.
+	 */
 	@Suppress("DEPRECATION")
 	object Drawables {
-		@JvmOverloads @JvmStatic fun icArrow(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(R.drawable.ic_arrow, theme) } else { application.resources.getDrawable(R.drawable.ic_arrow) }
-		@JvmOverloads @JvmStatic fun icGift(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(R.drawable.ic_gift, theme) } else { application.resources.getDrawable(R.drawable.ic_gift) }
-		@JvmOverloads @JvmStatic fun icLauncherForeground(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(R.drawable.ic_launcher_foreground, theme) } else { application.resources.getDrawable(R.drawable.ic_launcher_foreground) }
-		@JvmOverloads @JvmStatic fun icCart_lib1(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(com.example.lib1.R.drawable.ic_cart, theme) } else { application.resources.getDrawable(com.example.lib1.R.drawable.ic_cart) }
-		@JvmOverloads @JvmStatic fun icDone_lib2(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(com.example.lib2.R.drawable.ic_done, theme) } else { application.resources.getDrawable(com.example.lib2.R.drawable.ic_done) }
+		@JvmOverloads @JvmStatic fun icArrow(context: Context = application) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { context.resources.getDrawable(R.drawable.ic_arrow, context.theme) } else { context.resources.getDrawable(R.drawable.ic_arrow) }
+		@JvmOverloads @JvmStatic fun icGift(context: Context = application) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { context.resources.getDrawable(R.drawable.ic_gift, context.theme) } else { context.resources.getDrawable(R.drawable.ic_gift) }
+		@JvmOverloads @JvmStatic fun icLauncherForeground(context: Context = application) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { context.resources.getDrawable(R.drawable.ic_launcher_foreground, context.theme) } else { context.resources.getDrawable(R.drawable.ic_launcher_foreground) }
+		@JvmOverloads @JvmStatic fun icCart_lib1(context: Context = application) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { context.resources.getDrawable(com.example.lib1.R.drawable.ic_cart, context.theme) } else { context.resources.getDrawable(com.example.lib1.R.drawable.ic_cart) }
+		@JvmOverloads @JvmStatic fun icDone_lib2(context: Context = application) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { context.resources.getDrawable(com.example.lib2.R.drawable.ic_done, context.theme) } else { context.resources.getDrawable(com.example.lib2.R.drawable.ic_done) }
 	}
 }

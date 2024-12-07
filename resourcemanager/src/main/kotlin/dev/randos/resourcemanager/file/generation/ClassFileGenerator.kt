@@ -26,6 +26,7 @@ internal object ClassFileGenerator {
         return StringBuilder().apply {
             appendLine("package $namespace\n")
             appendLine("import android.app.Application")
+            appendLine("import android.content.Context")
             appendLine("import android.graphics.drawable.Drawable")
             appendLine("import android.content.res.Resources.Theme")
             appendLine("import android.os.Build")
@@ -73,6 +74,7 @@ internal object ClassFileGenerator {
 
     private fun StringBuilder.generateObjectForDrawableResources(resources: List<Resource>) {
         functionNames.clear()
+        appendLine(getDocumentation("drawable", "Drawables"))
         appendLine("\t@Suppress(\"DEPRECATION\")")
         appendLine("\tobject Drawables {")
         resources.forEach { resource ->
@@ -88,12 +90,12 @@ internal object ClassFileGenerator {
     }
 
     private fun StringBuilder.generateObjectForValueResources(resources: List<Resource>) {
-        val map = mutableMapOf<String, MutableList<Pair<ModuleDetails, ValueResource>>>()
+        val map = mutableMapOf<ValueResourceType, MutableList<Pair<ModuleDetails, ValueResource>>>()
         resources.forEach { resource ->
             resource.moduleDetails.resourceFiles.forEach { file ->
                 val xmlResources = XmlParser.parseXML(file)
                 xmlResources.forEach {
-                    val key = it.type::class.simpleName.toString()
+                    val key = it.type
                     if (!map.containsKey(key)) {
                         map[key] = mutableListOf()
                     }
@@ -102,91 +104,137 @@ internal object ClassFileGenerator {
             }
         }
 
-        map.toSortedMap().forEach {
-            val resourceObject = generateObject("${it.key}s", it.value.sortedBy { pair -> pair.second.name })
+        map.toSortedMap { o1, o2 -> o1::class.simpleName!!.compareTo(o2::class.simpleName!!) }.forEach {
+            val resourceObject = generateObject(it.key, it.value.sortedBy { pair -> pair.second.name })
             appendLine(resourceObject)
         }
     }
 
     private fun generateObject(
-        name: String,
+        valueResourceType: ValueResourceType,
         pairs: List<Pair<ModuleDetails, ValueResource>>
     ): String {
         val defaultIndentation = "\t\t"
         return StringBuilder().apply {
             functionNames.clear()
-            if (name == "Colors") {
+
+            val objectName = "${valueResourceType::class.simpleName}s"
+            appendLine(getDocumentation(valueResourceType.value, objectName))
+            if (valueResourceType is ValueResourceType.Color) {
                 appendLine("\t@Suppress(\"DEPRECATION\")")
             }
-            appendLine("\tobject $name {")
-            pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
-                when (resource.type) {
-                    ValueResourceType.Array, ValueResourceType.StringArray ->
+            appendLine("\tobject $objectName {")
+
+            when (valueResourceType) {
+                ValueResourceType.Array, ValueResourceType.StringArray -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendStringArrayResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.Boolean ->
+                ValueResourceType.Boolean -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendBooleanResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.Color ->
+                ValueResourceType.Color -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendColorResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.Dimension ->
+                ValueResourceType.Dimension -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendDimensionResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.Fraction ->
+                ValueResourceType.Fraction -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendFractionResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.IntArray ->
+                ValueResourceType.IntArray -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendIntArrayResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.Integer ->
+                ValueResourceType.Integer -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendIntegerResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    ValueResourceType.Plural ->
+                ValueResourceType.Plural -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendPluralResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
+                }
 
-                    is ValueResourceType.String ->
+                ValueResourceType.String -> {
+                    pairs.sortedBy { it.second.name }.forEach { (moduleDetails, resource) ->
                         appendStringResource(
                             resource = resource,
                             defaultIndentation = defaultIndentation,
                             moduleDetails = moduleDetails
                         )
+                    }
                 }
             }
             appendLine("\t}")
         }.toString()
+    }
+
+    private fun getDocumentation(
+        resourceType: String,
+        objectName: String
+    ): String {
+        return """
+            /**
+             * Provides access to $resourceType resources.
+             *
+             * By default, each function in the `$objectName` object uses the `Application` context to
+             * fetch $resourceType resource.
+             *
+             * To support dynamic locale, theme or orientation changes at runtime, pass
+             * the appropriate context (e.g., an `Activity` context) to the function.
+             */
+            """.trimIndent().prependIndent("\t")
     }
 
     private fun StringBuilder.appendDrawableResource(
@@ -198,7 +246,7 @@ internal object ClassFileGenerator {
         val moduleName = getDrawableMethodName(name, moduleDetails)
         if (isMethodNameUsedBefore(moduleName)) return
         appendLine(
-            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleName(theme: Theme = application.theme) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { application.resources.getDrawable(${namespaceString}R.drawable.$name, theme) } else { application.resources.getDrawable(${namespaceString}R.drawable.$name) }"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $moduleName(context: Context = application) : Drawable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { context.resources.getDrawable(${namespaceString}R.drawable.$name, context.theme) } else { context.resources.getDrawable(${namespaceString}R.drawable.$name) }"
         )
     }
 
@@ -211,7 +259,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName() : Float = application.resources.getDimension(${namespaceString}R.dimen.${resource.name})"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(context: Context = application) : Float = context.resources.getDimension(${namespaceString}R.dimen.${resource.name})"
         )
     }
 
@@ -224,7 +272,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(theme: Theme = application.theme) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { application.resources.getColor(${namespaceString}R.color.${resource.name}, theme) } else { application.resources.getColor(${namespaceString}R.color.${resource.name}) }"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(context: Context = application) : Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { context.resources.getColor(${namespaceString}R.color.${resource.name}, context.theme) } else { context.resources.getColor(${namespaceString}R.color.${resource.name}) }"
         )
     }
 
@@ -237,7 +285,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName() : Int = application.resources.getInteger(${namespaceString}R.integer.${resource.name})"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(context: Context = application) : Int = context.resources.getInteger(${namespaceString}R.integer.${resource.name})"
         )
     }
 
@@ -250,7 +298,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName() : Boolean = application.resources.getBoolean(${namespaceString}R.bool.${resource.name})"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(context: Context = application) : Boolean = context.resources.getBoolean(${namespaceString}R.bool.${resource.name})"
         )
     }
 
@@ -263,7 +311,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName(base: Int = 0, pbase: Int = 0) : Float = application.resources.getFraction(${namespaceString}R.fraction.${resource.name}, base, pbase)"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(base: Int = 0, pbase: Int = 0, context: Context = application) : Float = context.resources.getFraction(${namespaceString}R.fraction.${resource.name}, base, pbase)"
         )
     }
 
@@ -276,7 +324,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName(vararg args: Any? = emptyArray()) : String = if (args.isEmpty()) application.resources.getString(${namespaceString}R.string.${resource.name}) else application.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(vararg args: Any? = emptyArray(), context: Context = application) : String = if (args.isEmpty()) context.resources.getString(${namespaceString}R.string.${resource.name}) else context.resources.getString(${namespaceString}R.string.${resource.name}, *args)"
         )
     }
 
@@ -289,7 +337,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName(quantity: Int, vararg args: Any = emptyArray()) : String = application.resources.getQuantityString(${namespaceString}R.plurals.${resource.name}, quantity, args)"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(quantity: Int, vararg args: Any = emptyArray(), context: Context = application) : String = context.resources.getQuantityString(${namespaceString}R.plurals.${resource.name}, quantity, args)"
         )
     }
 
@@ -302,7 +350,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName() : kotlin.Array<String> = application.resources.getStringArray(${namespaceString}R.array.${resource.name})"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(context: Context = application) : kotlin.Array<String> = context.resources.getStringArray(${namespaceString}R.array.${resource.name})"
         )
     }
 
@@ -315,7 +363,7 @@ internal object ClassFileGenerator {
         val methodName = getValueResourceMethodName(resource, moduleDetails)
         if (isMethodNameUsedBefore(methodName)) return
         appendLine(
-            "$defaultIndentation@JvmStatic fun $methodName() : IntArray = application.resources.getIntArray(${namespaceString}R.array.${resource.name})"
+            "$defaultIndentation@JvmOverloads @JvmStatic fun $methodName(context: Context = application) : IntArray = context.resources.getIntArray(${namespaceString}R.array.${resource.name})"
         )
     }
 
