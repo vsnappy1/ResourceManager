@@ -74,12 +74,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class MyViewModel : ViewModel() {
-    
+// Constructor injection for easier testing and improved decoupling.
+class MyViewModel(
+  private val strings: ResourceManager.Strings,
+  private val drawables: ResourceManager.Drawables
+) : ViewModel() {
+
     fun getData() {
-        _title.postValue(ResourceManager.Strings.title())
-        _icon.postValue(ResourceManager.Drawables.icDoneButton())
-        _color.postValue(ResourceManager.Colors.primaryGreen())
+        _title.postValue(strings.title())
+        _icon.postValue(drawables.icDoneButton())
     }
 }
 ```
